@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
-import { supabase } from '../lib/supabase'
-import { generateAIMealSuggestion } from '../lib/ai-service'
+import { generateAIMealSuggestion, generateMultipleAISuggestions } from '../lib/ai-service'
 import { 
   ChefHat, 
   Clock, 
@@ -12,19 +11,24 @@ import {
   Sun,
   Moon,
   Brain,
-  Database
+  MessageCircle
 } from 'lucide-react'
 
 export default function Home() {
   const [mealType, setMealType] = useState('')
   const [dietaryPreference, setDietaryPreference] = useState('')
   const [suggestion, setSuggestion] = useState(null)
+  const [suggestions, setSuggestions] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [animateCard, setAnimateCard] = useState(false)
-  const [useAI, setUseAI] = useState(false)
   const [cuisine, setCuisine] = useState('')
   const [availableIngredients, setAvailableIngredients] = useState('')
+  const [showFeedback, setShowFeedback] = useState(false)
+  const [feedback, setFeedback] = useState({ name: '', email: '', message: '' })
+  const [feedbackSent, setFeedbackSent] = useState(false)
+  const [feedbackLoading, setFeedbackLoading] = useState(false)
+  const [showMultiple, setShowMultiple] = useState(false)
 
   const mealTypes = [
     { value: 'breakfast', label: 'Breakfast', icon: Coffee, emoji: '🌅', color: 'from-yellow-400 to-orange-500' },
@@ -43,7 +47,7 @@ export default function Home() {
 
   const cuisineOptions = [
     { value: '', label: 'Any Cuisine', description: 'Mix of cuisines' },
-    { value: 'Nigerian', label: 'Nigerian', description: 'Traditional Nigerian dishes' },
+    { value: 'Nigerian', label: 'Nigerian', description: 'Traditional Nigerian dishes', popular: true },
     { value: 'Italian', label: 'Italian', description: 'Pasta, pizza, Mediterranean' },
     { value: 'Mexican', label: 'Mexican', description: 'Tacos, enchiladas, spicy' },
     { value: 'Asian', label: 'Asian', description: 'Chinese, Japanese, Thai' },
@@ -52,183 +56,7 @@ export default function Home() {
     { value: 'Indian', label: 'Indian', description: 'Curries, spices, vegetarian' }
   ]
 
-  // Fallback meal suggestions
-  const fallbackSuggestions = {
-    breakfast: {
-      any: [
-        { 
-          name: 'Akara and Bread', 
-          description: 'Crispy bean fritters served with fresh bread and spicy pepper sauce', 
-          prep_time: '20 mins', 
-          ingredients: ['Black-eyed peas', 'Onions', 'Scotch bonnet pepper', 'Salt', 'Fresh bread', 'Palm oil'] 
-        },
-        { 
-          name: 'Moi Moi', 
-          description: 'Steamed bean pudding with aromatic spices and vegetables', 
-          prep_time: '45 mins', 
-          ingredients: ['Black-eyed peas', 'Red bell pepper', 'Onions', 'Palm oil', 'Seasoning cubes', 'Boiled eggs'] 
-        },
-        { 
-          name: 'Yam and Egg Sauce', 
-          description: 'Boiled yam served with scrambled eggs in tomato sauce', 
-          prep_time: '25 mins', 
-          ingredients: ['White yam', 'Eggs', 'Tomatoes', 'Onions', 'Pepper', 'Vegetable oil'] 
-        },
-        { 
-          name: 'Pancakes Nigerian Style', 
-          description: 'Fluffy pancakes with a Nigerian twist using plantain', 
-          prep_time: '20 mins', 
-          ingredients: ['Flour', 'Eggs', 'Milk', 'Ripe plantain', 'Sugar', 'Baking powder', 'Nutmeg'] 
-        }
-      ],
-      vegetarian: [
-        { 
-          name: 'Vegetarian Moi Moi', 
-          description: 'Steamed bean pudding with vegetables and no meat', 
-          prep_time: '45 mins', 
-          ingredients: ['Black-eyed peas', 'Bell peppers', 'Onions', 'Palm oil', 'Seasoning', 'Carrots'] 
-        },
-        { 
-          name: 'Bread and Tea', 
-          description: 'Fresh bread with Nigerian tea (milk tea with spices)', 
-          prep_time: '10 mins', 
-          ingredients: ['Fresh bread', 'Tea bags', 'Milk', 'Sugar', 'Ginger', 'Cloves'] 
-        },
-        { 
-          name: 'Fruit Salad with Yogurt', 
-          description: 'Fresh tropical fruits with creamy yogurt', 
-          prep_time: '15 mins', 
-          ingredients: ['Banana', 'Orange', 'Pineapple', 'Watermelon', 'Mango', 'Plain yogurt'] 
-        }
-      ],
-      vegan: [
-        { 
-          name: 'Vegan Akara', 
-          description: 'Bean fritters made without eggs, crispy and delicious', 
-          prep_time: '25 mins', 
-          ingredients: ['Black-eyed peas', 'Onions', 'Scotch bonnet pepper', 'Salt', 'Ginger'] 
-        },
-        { 
-          name: 'Tropical Fruit Bowl', 
-          description: 'Mixed seasonal Nigerian fruits', 
-          prep_time: '10 mins', 
-          ingredients: ['Banana', 'Orange', 'Mango', 'Pineapple', 'Coconut flakes'] 
-        }
-      ]
-    },
-    lunch: {
-      any: [
-        { 
-          name: 'Jollof Rice', 
-          description: 'The crown jewel of Nigerian cuisine - spiced rice with rich tomato base', 
-          prep_time: '50 mins', 
-          ingredients: ['Basmati rice', 'Tomatoes', 'Red bell peppers', 'Onions', 'Chicken stock', 'Bay leaves', 'Thyme', 'Curry powder'] 
-        },
-        { 
-          name: 'Egusi Soup with Pounded Yam', 
-          description: 'Rich melon seed soup with assorted meat and fish', 
-          prep_time: '75 mins', 
-          ingredients: ['Ground egusi', 'Spinach', 'Assorted meat', 'Stockfish', 'Palm oil', 'Onions', 'Pounded yam'] 
-        },
-        { 
-          name: 'Fried Rice Nigerian Style', 
-          description: 'Colorful rice with mixed vegetables and protein', 
-          prep_time: '35 mins', 
-          ingredients: ['Rice', 'Carrots', 'Green beans', 'Sweet corn', 'Green peas', 'Chicken', 'Curry powder'] 
-        },
-        { 
-          name: 'Amala and Ewedu', 
-          description: 'Yam flour with jute leaf soup - a Yoruba classic', 
-          prep_time: '40 mins', 
-          ingredients: ['Yam flour', 'Ewedu leaves', 'Locust beans', 'Palm oil', 'Assorted meat', 'Seasoning'] 
-        }
-      ],
-      vegetarian: [
-        { 
-          name: 'Vegetable Jollof Rice', 
-          description: 'Classic jollof rice loaded with mixed vegetables', 
-          prep_time: '45 mins', 
-          ingredients: ['Rice', 'Tomatoes', 'Carrots', 'Green beans', 'Sweet peas', 'Vegetable stock', 'Bell peppers'] 
-        },
-        { 
-          name: 'Vegetable Soup with Semolina', 
-          description: 'Nutritious vegetable soup with semolina swallow', 
-          prep_time: '35 mins', 
-          ingredients: ['Mixed vegetables', 'Spinach', 'Tomatoes', 'Palm oil', 'Seasoning', 'Semolina'] 
-        }
-      ],
-      vegan: [
-        { 
-          name: 'Vegan Jollof Rice', 
-          description: 'Plant-based version of the classic jollof rice', 
-          prep_time: '45 mins', 
-          ingredients: ['Rice', 'Tomatoes', 'Onions', 'Vegetable oil', 'Vegetable stock', 'Mixed vegetables'] 
-        },
-        { 
-          name: 'Vegetable Stir-fry with Rice', 
-          description: 'Colorful vegetables stir-fried with Nigerian spices', 
-          prep_time: '25 mins', 
-          ingredients: ['Cabbage', 'Carrots', 'Green beans', 'Onions', 'Ginger', 'Garlic', 'White rice'] 
-        }
-      ]
-    },
-    dinner: {
-      any: [
-        { 
-          name: 'Pepper Soup', 
-          description: 'Spicy Nigerian soup perfect for dinner', 
-          prep_time: '50 mins', 
-          ingredients: ['Goat meat', 'Pepper soup spice', 'Onions', 'Ginger', 'Garlic', 'Scent leaves', 'Yam'] 
-        },
-        { 
-          name: 'Rice and Stew', 
-          description: 'White rice with rich Nigerian tomato stew', 
-          prep_time: '60 mins', 
-          ingredients: ['Rice', 'Tomatoes', 'Beef', 'Onions', 'Red peppers', 'Palm oil', 'Seasoning'] 
-        },
-        { 
-          name: 'Spaghetti Nigerian Style', 
-          description: 'Spaghetti with Nigerian tomato sauce and spices', 
-          prep_time: '35 mins', 
-          ingredients: ['Spaghetti', 'Ground beef', 'Tomatoes', 'Onions', 'Garlic', 'Curry powder', 'Bay leaves'] 
-        },
-        { 
-          name: 'Plantain and Beans', 
-          description: 'Sweet plantain with beans porridge - comfort food', 
-          prep_time: '45 mins', 
-          ingredients: ['Ripe plantain', 'Brown beans', 'Palm oil', 'Onions', 'Pepper', 'Crayfish'] 
-        }
-      ],
-      vegetarian: [
-        { 
-          name: 'Vegetable Rice', 
-          description: 'Rice cooked with assorted vegetables', 
-          prep_time: '35 mins', 
-          ingredients: ['Rice', 'Carrots', 'Green beans', 'Sweet peas', 'Onions', 'Vegetable oil'] 
-        },
-        { 
-          name: 'Beans Porridge', 
-          description: 'Beans cooked with plantain and vegetables', 
-          prep_time: '70 mins', 
-          ingredients: ['Brown beans', 'Ripe plantain', 'Spinach', 'Palm oil', 'Onions', 'Pepper'] 
-        }
-      ],
-      vegan: [
-        { 
-          name: 'Vegan Beans Porridge', 
-          description: 'Plant-based beans porridge with coconut oil', 
-          prep_time: '65 mins', 
-          ingredients: ['Brown beans', 'Plantain', 'Spinach', 'Coconut oil', 'Onions', 'Pepper'] 
-        },
-        { 
-          name: 'Vegetable Pasta', 
-          description: 'Pasta with rich vegetable sauce', 
-          prep_time: '30 mins', 
-          ingredients: ['Pasta', 'Tomatoes', 'Onions', 'Bell peppers', 'Garlic', 'Basil', 'Olive oil'] 
-        }
-      ]
-    }
-  }
+
 
   const getSuggestion = async () => {
     if (!mealType || !dietaryPreference) {
@@ -239,65 +67,78 @@ export default function Home() {
     setLoading(true)
     setError('')
     setAnimateCard(false)
+    setShowMultiple(false)
 
     try {
-      let selectedSuggestion = null
-
-      if (useAI) {
-        // Generate AI suggestion
-        selectedSuggestion = await generateAIMealSuggestion(
-          mealType, 
-          dietaryPreference, 
-          cuisine, 
-          availableIngredients
-        )
-      } else {
-        // Try to get suggestion from Supabase
-        const { data, error: supabaseError } = await supabase
-          .from('meal_suggestions')
-          .select('*')
-          .eq('meal_type', mealType)
-          .eq('dietary_preference', dietaryPreference)
-
-        if (!supabaseError && data && data.length > 0) {
-          // Get random suggestion from database
-          const randomIndex = Math.floor(Math.random() * data.length)
-          selectedSuggestion = data[randomIndex]
-        } else {
-          // Use fallback suggestions
-          const fallbackOptions = fallbackSuggestions[mealType]?.[dietaryPreference] || 
-                                 fallbackSuggestions[mealType]?.['any'] || []
-          
-          if (fallbackOptions.length > 0) {
-            const randomIndex = Math.floor(Math.random() * fallbackOptions.length)
-            selectedSuggestion = fallbackOptions[randomIndex]
-          }
-        }
-      }
+      // Generate AI suggestion
+      const selectedSuggestion = await generateAIMealSuggestion(
+        mealType, 
+        dietaryPreference, 
+        cuisine, 
+        availableIngredients
+      )
 
       if (selectedSuggestion) {
         setSuggestion(selectedSuggestion)
+        setSuggestions([])
         setAnimateCard(true)
       } else {
         setError('No suggestions found for your preferences. Try different options!')
       }
     } catch (err) {
-      console.error('Error fetching suggestion:', err)
-      
-      // Fallback to local suggestions on error
-      const fallbackOptions = fallbackSuggestions[mealType]?.[dietaryPreference] || 
-                             fallbackSuggestions[mealType]?.['any'] || []
-      
-      if (fallbackOptions.length > 0) {
-        const randomIndex = Math.floor(Math.random() * fallbackOptions.length)
-        setSuggestion(fallbackOptions[randomIndex])
-        setAnimateCard(true)
-      } else {
-        setError('Unable to get suggestions. Please try again.')
-      }
+      console.error('Error generating AI suggestion:', err)
+      setError('Unable to generate AI suggestion. Please check your OpenAI API key and try again.')
     } finally {
       setLoading(false)
     }
+  }
+
+  const getMultipleSuggestions = async () => {
+    if (!mealType || !dietaryPreference) {
+      setError('Please select both meal type and dietary preference')
+      return
+    }
+
+    setLoading(true)
+    setError('')
+    setAnimateCard(false)
+    setShowMultiple(true)
+
+    try {
+      // Generate multiple AI suggestions
+      const multipleSuggestions = await generateMultipleAISuggestions(
+        mealType, 
+        dietaryPreference, 
+        cuisine, 
+        availableIngredients,
+        3
+      )
+
+      if (multipleSuggestions && multipleSuggestions.length > 0) {
+        setSuggestions(multipleSuggestions)
+        setSuggestion(null)
+        setAnimateCard(true)
+      } else {
+        setError('Unable to generate multiple suggestions. Please try again.')
+      }
+    } catch (err) {
+      console.error('Error generating multiple AI suggestions:', err)
+      setError('Unable to generate multiple suggestions. Please check your OpenAI API key and try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleFeedbackSubmit = async (e) => {
+    e.preventDefault()
+    setFeedbackLoading(true)
+    // For now, just log the feedback. You can wire this up to Formspree or your backend later.
+    console.log('User Feedback:', feedback)
+    setTimeout(() => {
+      setFeedbackSent(true)
+      setFeedbackLoading(false)
+      setFeedback({ name: '', email: '', message: '' })
+    }, 1000)
   }
 
   return (
@@ -388,97 +229,57 @@ export default function Home() {
             </div>
           </div>
 
-          {/* AI vs Database Toggle */}
-          <div className="mb-8">
-            <label className="block text-xl font-bold text-gray-800 mb-6">
-              <Brain className="inline w-6 h-6 mr-3" />
-              Suggestion Type
-            </label>
-            <div className="flex gap-4 mb-6">
-              <button
-                onClick={() => setUseAI(false)}
-                className={`flex-1 flex items-center justify-center gap-3 p-4 rounded-xl border-2 transition-all duration-300 ${
-                  !useAI
-                    ? 'border-orange-500 bg-gradient-to-br from-orange-50 to-orange-100 shadow-lg'
-                    : 'border-gray-200 hover:border-orange-300 hover:bg-gradient-to-br hover:from-orange-25 hover:to-orange-50'
-                }`}
-              >
-                <Database className={`w-5 h-5 ${!useAI ? 'text-orange-600' : 'text-gray-400'}`} />
-                <div className="text-left">
-                  <div className={`font-semibold ${!useAI ? 'text-orange-700' : 'text-gray-700'}`}>
-                    Database Suggestions
-                  </div>
-                  <div className="text-sm text-gray-500">Curated meal collection</div>
-                </div>
-              </button>
-              
-              <button
-                onClick={() => setUseAI(true)}
-                className={`flex-1 flex items-center justify-center gap-3 p-4 rounded-xl border-2 transition-all duration-300 ${
-                  useAI
-                    ? 'border-orange-500 bg-gradient-to-br from-orange-50 to-orange-100 shadow-lg'
-                    : 'border-gray-200 hover:border-orange-300 hover:bg-gradient-to-br hover:from-orange-25 hover:to-orange-50'
-                }`}
-              >
-                <Brain className={`w-5 h-5 ${useAI ? 'text-orange-600' : 'text-gray-400'}`} />
-                <div className="text-left">
-                  <div className={`font-semibold ${useAI ? 'text-orange-700' : 'text-gray-700'}`}>
-                    AI Suggestions
-                  </div>
-                  <div className="text-sm text-gray-500">Personalized & creative</div>
-                </div>
-              </button>
+          {/* AI Options */}
+          <div className="mb-8 space-y-6">
+            {/* Cuisine Preference */}
+            <div>
+              <label className="block text-lg font-semibold text-gray-800 mb-4">
+                Preferred Cuisine (Optional)
+              </label>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+                {cuisineOptions.map((cuisineOption) => (
+                  <button
+                    key={cuisineOption.value}
+                    onClick={() => setCuisine(cuisineOption.value)}
+                    className={`p-3 rounded-lg border-2 transition-all duration-300 text-left relative ${
+                      cuisine === cuisineOption.value
+                        ? 'border-orange-500 bg-gradient-to-br from-orange-50 to-orange-100 shadow-lg'
+                        : 'border-gray-200 hover:border-orange-300 hover:bg-gradient-to-br hover:from-orange-25 hover:to-orange-50'
+                    }`}
+                  >
+                    {cuisineOption.popular && (
+                      <div className="absolute -top-2 -right-2 bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-md">
+                        Popular
+                      </div>
+                    )}
+                    <div className={`font-medium text-sm ${
+                      cuisine === cuisineOption.value ? 'text-orange-700' : 'text-gray-700'
+                    }`}>
+                      {cuisineOption.label}
+                    </div>
+                    <div className="text-xs text-gray-500">{cuisineOption.description}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Available Ingredients */}
+            <div>
+              <label className="block text-lg font-semibold text-gray-800 mb-3">
+                Available Ingredients (Optional)
+              </label>
+              <textarea
+                value={availableIngredients}
+                onChange={(e) => setAvailableIngredients(e.target.value)}
+                placeholder="e.g., chicken, rice, tomatoes, onions, garlic..."
+                className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:outline-none transition-colors resize-none"
+                rows="3"
+              />
+              <p className="text-sm text-gray-500 mt-2">
+                List ingredients you have on hand for more personalized suggestions
+              </p>
             </div>
           </div>
-
-          {/* AI Options - Only show when AI is selected */}
-          {useAI && (
-            <div className="mb-8 space-y-6">
-              {/* Cuisine Preference */}
-              <div>
-                <label className="block text-lg font-semibold text-gray-800 mb-4">
-                  Preferred Cuisine (Optional)
-                </label>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-                  {cuisineOptions.map((cuisineOption) => (
-                    <button
-                      key={cuisineOption.value}
-                      onClick={() => setCuisine(cuisineOption.value)}
-                      className={`p-3 rounded-lg border-2 transition-all duration-300 text-left ${
-                        cuisine === cuisineOption.value
-                          ? 'border-orange-500 bg-gradient-to-br from-orange-50 to-orange-100 shadow-lg'
-                          : 'border-gray-200 hover:border-orange-300 hover:bg-gradient-to-br hover:from-orange-25 hover:to-orange-50'
-                      }`}
-                    >
-                      <div className={`font-medium text-sm ${
-                        cuisine === cuisineOption.value ? 'text-orange-700' : 'text-gray-700'
-                      }`}>
-                        {cuisineOption.label}
-                      </div>
-                      <div className="text-xs text-gray-500">{cuisineOption.description}</div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Available Ingredients */}
-              <div>
-                <label className="block text-lg font-semibold text-gray-800 mb-3">
-                  Available Ingredients (Optional)
-                </label>
-                <textarea
-                  value={availableIngredients}
-                  onChange={(e) => setAvailableIngredients(e.target.value)}
-                  placeholder="e.g., chicken, rice, tomatoes, onions, garlic..."
-                  className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:outline-none transition-colors resize-none"
-                  rows="3"
-                />
-                <p className="text-sm text-gray-500 mt-2">
-                  List ingredients you have on hand for more personalized suggestions
-                </p>
-              </div>
-            </div>
-          )}
 
           {/* Error Message */}
           {error && (
@@ -487,26 +288,44 @@ export default function Home() {
             </div>
           )}
 
-          {/* Get Suggestion Button */}
-          <button
-            onClick={getSuggestion}
-            disabled={loading}
-            className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold py-5 px-8 rounded-2xl hover:from-orange-600 hover:to-red-600 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 text-lg shadow-lg hover:shadow-xl btn-pulse"
-          >
-            {loading ? (
-              <RefreshCw className="w-6 h-6 animate-spin" />
-            ) : (
-              useAI ? <Brain className="w-6 h-6" /> : <ChefHat className="w-6 h-6" />
-            )}
-            {loading 
-              ? (useAI ? 'AI is Creating Your Perfect Meal...' : 'Getting Your Perfect Meal...')
-              : (useAI ? 'Get AI Meal Suggestion' : 'Get Meal Suggestion')
-            }
-          </button>
+          {/* Get Suggestion Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4">
+            <button
+              onClick={getSuggestion}
+              disabled={loading}
+              className="flex-1 bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold py-5 px-8 rounded-2xl hover:from-orange-600 hover:to-red-600 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 text-lg shadow-lg hover:shadow-xl btn-pulse"
+            >
+              {loading ? (
+                <RefreshCw className="w-6 h-6 animate-spin" />
+              ) : (
+                <Brain className="w-6 h-6" />
+              )}
+              {loading 
+                ? 'AI is Creating Your Perfect Meal...'
+                : 'Get AI Meal Suggestion'
+              }
+            </button>
+            
+            <button
+              onClick={getMultipleSuggestions}
+              disabled={loading}
+              className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold py-5 px-8 rounded-2xl hover:from-purple-600 hover:to-pink-600 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 text-lg shadow-lg hover:shadow-xl btn-pulse"
+            >
+              {loading ? (
+                <RefreshCw className="w-6 h-6 animate-spin" />
+              ) : (
+                <Sparkles className="w-6 h-6" />
+              )}
+              {loading 
+                ? 'AI is Creating Multiple Meals...'
+                : 'Get 3 AI Suggestions'
+              }
+            </button>
+          </div>
         </div>
 
-        {/* Suggestion Card */}
-        {suggestion && (
+        {/* Single Suggestion Card */}
+        {suggestion && !showMultiple && (
           <div className={`bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl p-8 md:p-10 border-l-4 border-orange-500 transition-all duration-500 ${
             animateCard ? 'animate-slide-up' : ''
           }`}>
@@ -556,6 +375,18 @@ export default function Home() {
                     <span className="font-medium">{suggestion.cuisine}</span>
                   </div>
                 )}
+                {suggestion.serving_size && (
+                  <div className="flex items-center gap-2 bg-yellow-50 px-4 py-2 rounded-full">
+                    <Heart className="w-5 h-5 text-yellow-500" />
+                    <span className="font-medium">{suggestion.serving_size}</span>
+                  </div>
+                )}
+                {suggestion.estimated_cost && (
+                  <div className="flex items-center gap-2 bg-indigo-50 px-4 py-2 rounded-full">
+                    <span className="text-indigo-500 font-bold">$</span>
+                    <span className="font-medium">{suggestion.estimated_cost}</span>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -595,6 +426,26 @@ export default function Home() {
                       </div>
                       <span className="text-gray-700 leading-relaxed">{instruction}</span>
                     </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Tags - Only for AI suggestions */}
+            {suggestion.tags && suggestion.tags.length > 0 && (
+              <div className="mb-8">
+                <h4 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                  <span className="w-2 h-2 bg-pink-500 rounded-full"></span>
+                  Tags:
+                </h4>
+                <div className="flex flex-wrap gap-2">
+                  {suggestion.tags.map((tag, index) => (
+                    <span
+                      key={index}
+                      className="px-3 py-1 bg-gradient-to-r from-pink-100 to-purple-100 text-pink-700 font-medium rounded-full text-sm border border-pink-200"
+                    >
+                      {tag}
+                    </span>
                   ))}
                 </div>
               </div>
@@ -653,14 +504,216 @@ export default function Home() {
           </div>
         )}
 
+        {/* Multiple Suggestions Display */}
+        {showMultiple && suggestions.length > 0 && (
+          <div className={`bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl p-8 md:p-10 border-l-4 border-purple-500 transition-all duration-500 ${
+            animateCard ? 'animate-slide-up' : ''
+          }`}>
+            <div className="flex items-center gap-3 mb-8">
+              <div className="p-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full">
+                <Sparkles className="w-6 h-6 text-white" />
+              </div>
+              <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                Multiple AI Suggestions
+              </h2>
+            </div>
+            
+            <div className="space-y-8">
+              {suggestions.map((suggestion, index) => (
+                <div key={index} className="border-b border-gray-200 pb-8 last:border-b-0">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full flex items-center justify-center font-bold">
+                      {index + 1}
+                    </div>
+                    <h3 className="text-xl font-bold text-purple-600">
+                      {suggestion.name}
+                    </h3>
+                    <div className="flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-semibold rounded-full">
+                      <Brain className="w-3 h-3" />
+                      AI
+                    </div>
+                  </div>
+                  
+                  <p className="text-gray-700 mb-4 leading-relaxed">
+                    {suggestion.description}
+                  </p>
+                  
+                  <div className="flex items-center gap-4 text-gray-600 mb-4 flex-wrap">
+                    <div className="flex items-center gap-2 bg-orange-50 px-3 py-1 rounded-full">
+                      <Clock className="w-4 h-4 text-orange-500" />
+                      <span className="text-sm font-medium">{suggestion.prep_time}</span>
+                    </div>
+                    <div className="flex items-center gap-2 bg-green-50 px-3 py-1 rounded-full">
+                      <Utensils className="w-4 h-4 text-green-500" />
+                      <span className="text-sm font-medium capitalize">{mealType}</span>
+                    </div>
+                    {suggestion.difficulty && (
+                      <div className="flex items-center gap-2 bg-blue-50 px-3 py-1 rounded-full">
+                        <ChefHat className="w-4 h-4 text-blue-500" />
+                        <span className="text-sm font-medium">{suggestion.difficulty}</span>
+                      </div>
+                    )}
+                    {suggestion.cuisine && suggestion.cuisine !== 'Mixed' && (
+                      <div className="flex items-center gap-2 bg-purple-50 px-3 py-1 rounded-full">
+                        <Sparkles className="w-4 h-4 text-purple-500" />
+                        <span className="text-sm font-medium">{suggestion.cuisine}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="mb-4">
+                    <h4 className="text-sm font-bold text-gray-800 mb-2">Ingredients:</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                      {suggestion.ingredients.slice(0, 6).map((ingredient, idx) => (
+                        <div
+                          key={idx}
+                          className="flex items-center gap-2 p-2 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg border border-purple-100"
+                        >
+                          <div className="w-1.5 h-1.5 bg-purple-400 rounded-full flex-shrink-0"></div>
+                          <span className="text-sm text-gray-700">{ingredient}</span>
+                        </div>
+                      ))}
+                      {suggestion.ingredients.length > 6 && (
+                        <div className="text-sm text-gray-500 italic">
+                          +{suggestion.ingredients.length - 6} more ingredients
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {suggestion.tags && suggestion.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mb-4">
+                      {suggestion.tags.slice(0, 4).map((tag, idx) => (
+                        <span
+                          key={idx}
+                          className="px-2 py-1 bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 font-medium rounded-full text-xs border border-purple-200"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-4 mt-8">
+              <button
+                onClick={getMultipleSuggestions}
+                className="flex-1 bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 font-semibold py-4 px-6 rounded-xl hover:from-gray-200 hover:to-gray-300 transition-all duration-300 flex items-center justify-center gap-2 btn-pulse"
+              >
+                <RefreshCw className="w-5 h-5" />
+                Get More Suggestions
+              </button>
+              
+              <button
+                onClick={() => {
+                  const allSuggestions = suggestions.map(s => `${s.name}: ${s.description}`).join('\n\n')
+                  if (navigator.share) {
+                    navigator.share({
+                      title: `Multiple Meal Suggestions - MomFoodie`,
+                      text: `Check out these ${mealType} suggestions:\n\n${allSuggestions}`,
+                      url: window.location.href
+                    })
+                  } else {
+                    navigator.clipboard.writeText(allSuggestions)
+                    alert('Suggestions copied to clipboard!')
+                  }
+                }}
+                className="flex-1 sm:flex-initial bg-gradient-to-r from-pink-500 to-purple-500 text-white font-semibold py-4 px-6 rounded-xl hover:from-pink-600 hover:to-purple-600 transition-all duration-300 flex items-center justify-center gap-2 btn-pulse"
+              >
+                <Heart className="w-5 h-5" />
+                Share All
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Footer */}
-        <div className="text-center mt-12">
+        <div className="text-center mt-12 relative">
           <div className="inline-flex items-center gap-2 px-6 py-3 bg-white/60 backdrop-blur-sm rounded-full border border-white/30">
             <Heart className="w-5 h-5 text-red-500 animate-pulse" />
             <p className="text-gray-600 font-medium">Made with love for delicious meals</p>
             <ChefHat className="w-5 h-5 text-orange-500" />
           </div>
+          <button
+            className="fixed bottom-8 right-8 z-50 bg-gradient-to-r from-orange-500 to-red-500 text-white p-4 rounded-full shadow-lg hover:scale-110 transition-all flex items-center gap-2"
+            onClick={() => { setShowFeedback(true); setFeedbackSent(false); }}
+            aria-label="Send Feedback"
+          >
+            <MessageCircle className="w-6 h-6" />
+            <span className="hidden md:inline font-semibold">Send Feedback</span>
+          </button>
         </div>
+
+        {/* Feedback Modal */}
+        {showFeedback && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+            <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md relative animate-fade-in">
+              <button
+                className="absolute top-3 right-3 text-gray-400 hover:text-red-500 text-2xl font-bold"
+                onClick={() => setShowFeedback(false)}
+                aria-label="Close Feedback"
+              >
+                &times;
+              </button>
+              {feedbackSent ? (
+                <div className="text-center py-8">
+                  <h3 className="text-2xl font-bold text-orange-600 mb-4">Thank you for your feedback!</h3>
+                  <p className="text-gray-600">We appreciate your input and will use it to improve MomFoodie.</p>
+                  <button
+                    className="mt-6 bg-gradient-to-r from-orange-500 to-red-500 text-white font-semibold py-3 px-6 rounded-xl hover:from-orange-600 hover:to-red-600 transition-all"
+                    onClick={() => setShowFeedback(false)}
+                  >
+                    Close
+                  </button>
+                </div>
+              ) : (
+                <form onSubmit={handleFeedbackSubmit} className="space-y-5">
+                  <h3 className="text-2xl font-bold text-orange-600 mb-2 text-center">Send Us Feedback</h3>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Name (optional)</label>
+                    <input
+                      type="text"
+                      className="w-full border-2 border-gray-200 rounded-lg p-3 focus:border-orange-500 focus:outline-none"
+                      value={feedback.name}
+                      onChange={e => setFeedback(f => ({ ...f, name: e.target.value }))}
+                      placeholder="Your name"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Email (optional)</label>
+                    <input
+                      type="email"
+                      className="w-full border-2 border-gray-200 rounded-lg p-3 focus:border-orange-500 focus:outline-none"
+                      value={feedback.email}
+                      onChange={e => setFeedback(f => ({ ...f, email: e.target.value }))}
+                      placeholder="you@email.com"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Message <span className="text-red-500">*</span></label>
+                    <textarea
+                      className="w-full border-2 border-gray-200 rounded-lg p-3 focus:border-orange-500 focus:outline-none resize-none"
+                      rows="4"
+                      required
+                      value={feedback.message}
+                      onChange={e => setFeedback(f => ({ ...f, message: e.target.value }))}
+                      placeholder="Your feedback..."
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold py-3 px-6 rounded-xl hover:from-orange-600 hover:to-red-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={feedbackLoading}
+                  >
+                    {feedbackLoading ? 'Sending...' : 'Send Feedback'}
+                  </button>
+                </form>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
