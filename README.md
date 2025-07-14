@@ -8,7 +8,10 @@ A beautiful, responsive web application that helps you decide what to cook for b
 
 - **Meal Type Selection**: Choose from breakfast, lunch, or dinner
 - **Dietary Preferences**: Filter by dietary needs (vegetarian, vegan, gluten-free, low-carb, high-protein)
-- **Nigerian Cuisine Focus**: Authentic Nigerian dishes with detailed ingredients
+- **AI-Powered Suggestions**: Get personalized meal recommendations using OpenAI
+- **Database Suggestions**: Curated collection of authentic Nigerian and international dishes
+- **Cuisine Preferences**: Choose your preferred cuisine style
+- **Ingredient-Based Suggestions**: Get recipes based on ingredients you have
 - **Fallback System**: Works even without database connection
 - **Mobile Responsive**: Beautiful design that works on all devices
 - **Share Functionality**: Share recipes with friends and family
@@ -39,10 +42,14 @@ A beautiful, responsive web application that helps you decide what to cook for b
    cp .env.local .env.local.example
    ```
    
-   Edit `.env.local` and add your Supabase credentials:
+   Edit `.env.local` and add your credentials:
    ```env
+   # Supabase Configuration (for database suggestions)
    NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url_here
    NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key_here
+   
+   # OpenAI Configuration (for AI suggestions)
+   NEXT_PUBLIC_OPENAI_API_KEY=your_openai_api_key_here
    ```
 
 4. **Set up the database (optional)**
@@ -62,9 +69,31 @@ A beautiful, responsive web application that helps you decide what to cook for b
    
    Navigate to `http://localhost:3000` to see the app!
 
+## 🤖 AI Setup
+
+### OpenAI Configuration (for AI Suggestions)
+
+1. **Get OpenAI API Key**
+   - Go to [platform.openai.com](https://platform.openai.com)
+   - Create an account or sign in
+   - Go to API Keys section
+   - Create a new API key
+   - Copy the key and add it to your `.env.local` file
+
+2. **Configure API Key**
+   ```env
+   NEXT_PUBLIC_OPENAI_API_KEY=sk-your-actual-api-key-here
+   ```
+
+3. **Usage**
+   - Select "AI Suggestions" in the app
+   - Choose your preferred cuisine (optional)
+   - List available ingredients (optional)
+   - Get personalized meal recommendations
+
 ## 🗄️ Database Setup
 
-### Using Supabase (Recommended)
+### Using Supabase (for Database Suggestions)
 
 1. **Create a Supabase Project**
    - Go to [supabase.com](https://supabase.com)
@@ -123,6 +152,7 @@ The app uses a single table `meal_suggestions` with:
 - **React 18** - UI library
 - **Tailwind CSS 3** - Styling
 - **Supabase** - Backend and database
+- **OpenAI GPT-3.5** - AI-powered meal suggestions
 - **Lucide React** - Icons
 - **TypeScript** - Type safety
 
