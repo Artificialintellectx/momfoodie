@@ -25,19 +25,24 @@ export default async function handler(req, res) {
       receivedAt: new Date().toISOString()
     });
 
+    // Check if email environment variables are configured
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+      console.warn('Email environment variables not configured. Skipping email notification.');
+      // Still return success to user, but log the warning
+      return res.status(200).json({ 
+        success: true, 
+        message: 'Feedback received successfully (email notification not configured)',
+        timestamp: new Date().toISOString()
+      });
+    }
+
     // Send email notification
-    await sendEmailNotification({ message, timestamp, userAgent, url });
-
-    // Option 2: Store in database
-    // await storeFeedbackInDatabase({ message, timestamp, userAgent, url });
-
-    // Option 3: Send to external service (Slack, Discord, etc.)
-    // await sendToExternalService({ message, timestamp, userAgent, url });
+    const emailResult = await sendEmailNotification({ message, timestamp, userAgent, url });
 
     // Return success
     res.status(200).json({ 
       success: true, 
-      message: 'Feedback received and email sent successfully',
+      message: emailResult.success ? 'Feedback received and email sent successfully' : 'Feedback received (email failed)',
       timestamp: new Date().toISOString()
     });
 
@@ -56,6 +61,10 @@ async function sendEmailNotification(feedbackData) {
     // Check if nodemailer is available
     const nodemailer = require('nodemailer');
     
+    console.log('Attempting to send email notification...');
+    console.log('Email user:', process.env.EMAIL_USER ? 'Configured' : 'Not configured');
+    console.log('Email pass:', process.env.EMAIL_PASS ? 'Configured' : 'Not configured');
+    
     // Create transporter
     const transporter = nodemailer.createTransport({
       service: 'gmail',
@@ -65,8 +74,12 @@ async function sendEmailNotification(feedbackData) {
       }
     });
     
+    // Verify transporter configuration
+    await transporter.verify();
+    console.log('Email transporter verified successfully');
+    
     // Send email
-    await transporter.sendMail({
+    const result = await transporter.sendMail({
       from: process.env.EMAIL_USER,
       to: process.env.EMAIL_USER, // Send to yourself
       subject: 'New Feedback from Mummyfoodie',
@@ -89,10 +102,18 @@ async function sendEmailNotification(feedbackData) {
       `
     });
     
-    console.log('Feedback email sent successfully');
+    console.log('Feedback email sent successfully:', result.messageId);
+    return { success: true, messageId: result.messageId };
   } catch (error) {
     console.error('Failed to send feedback email:', error);
+    console.error('Error details:', {
+      code: error.code,
+      command: error.command,
+      response: error.response,
+      responseCode: error.responseCode
+    });
     // Don't throw error - we still want to return success to user
     // but log the email failure
+    return { success: false, error: error.message };
   }
 } 
