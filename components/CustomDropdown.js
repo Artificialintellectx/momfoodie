@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 
-export default function CustomDropdown({ options, value, onChange, placeholder = 'Select...', label }) {
+export default function CustomDropdown({ options, value, onChange, placeholder = 'Select...', label, disabled = false }) {
   const [open, setOpen] = useState(false);
   const containerRef = useRef(null);
   const buttonRef = useRef(null);
@@ -18,6 +18,7 @@ export default function CustomDropdown({ options, value, onChange, placeholder =
 
   // Keyboard accessibility
   function handleKeyDown(e) {
+    if (disabled) return;
     if (e.key === 'Enter' || e.key === ' ') {
       setOpen((prev) => !prev);
     } else if (e.key === 'Escape') {
@@ -35,13 +36,18 @@ export default function CustomDropdown({ options, value, onChange, placeholder =
       <button
         ref={buttonRef}
         type="button"
+        disabled={disabled}
         className={`w-full flex items-center justify-between px-4 py-3 rounded-full border-2 focus:outline-none transition-all duration-200 bg-white/70 backdrop-blur-md shadow-md ${
-          open ? 'border-orange-400' : 'border-gray-200'
+          disabled 
+            ? 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed' 
+            : open 
+              ? 'border-orange-400' 
+              : 'border-gray-200'
         }`}
         aria-haspopup="listbox"
         aria-expanded={open}
-        tabIndex={0}
-        onClick={() => setOpen((prev) => !prev)}
+        tabIndex={disabled ? -1 : 0}
+        onClick={() => !disabled && setOpen((prev) => !prev)}
         onKeyDown={handleKeyDown}
       >
         <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -54,13 +60,13 @@ export default function CustomDropdown({ options, value, onChange, placeholder =
             {selected ? selected.label : placeholder}
           </span>
         </div>
-        <svg className="w-5 h-5 text-gray-400 transition-transform duration-200 flex-shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className={`w-5 h-5 text-gray-400 transition-transform duration-200 flex-shrink-0 ml-2 ${open ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
         </svg>
       </button>
       
       {/* Backdrop */}
-      {open && (
+      {open && !disabled && (
         <div 
           className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40"
           onClick={() => setOpen(false)}
@@ -68,7 +74,7 @@ export default function CustomDropdown({ options, value, onChange, placeholder =
       )}
       
       {/* Mobile Dropdown - Centered */}
-      {open && (
+      {open && !disabled && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:hidden">
           <div className="bg-white/95 backdrop-blur-xl border-2 border-gray-100 rounded-2xl shadow-2xl py-4 w-full max-w-sm max-h-80 overflow-y-auto">
             <div className="px-4 pb-2 border-b border-gray-100">
@@ -102,7 +108,7 @@ export default function CustomDropdown({ options, value, onChange, placeholder =
       )}
       
       {/* Desktop Dropdown - Relative positioning */}
-      {open && (
+      {open && !disabled && (
         <div className="hidden md:block absolute left-0 right-0 mt-2 z-50">
           <div className="bg-white/95 backdrop-blur-xl border-2 border-gray-100 rounded-2xl shadow-2xl py-2 max-h-64 overflow-y-auto">
             {options.map((option) => (

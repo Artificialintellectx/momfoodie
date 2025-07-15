@@ -236,7 +236,15 @@ export default function Home() {
     { value: 'vegan', label: 'Vegan', icon: '🌱' },
     { value: 'gluten-free', label: 'Gluten-Free', icon: '🌾' },
     { value: 'low-carb', label: 'Low-Carb', icon: '🥑' },
-    { value: 'high-protein', label: 'High-Protein', icon: '💪' }
+    { value: 'high-protein', label: 'High-Protein', icon: '💪' },
+    { value: 'halal', label: 'Halal', icon: '☪️' },
+    { value: 'no-pork', label: 'No Pork', icon: '🐷' },
+    { value: 'no-beef', label: 'No Beef', icon: '🐄' },
+    { value: 'pescatarian', label: 'Pescatarian', icon: '🐟' },
+    { value: 'low-spice', label: 'Low Spice', icon: '🌶️' },
+    { value: 'no-seafood', label: 'No Seafood', icon: '🦐' },
+    { value: 'traditional-nigerian', label: 'Traditional Nigerian', icon: '🇳🇬' },
+    { value: 'modern-nigerian', label: 'Modern Nigerian', icon: '🍛' }
   ];
 
   const cuisineOptions = [
@@ -251,6 +259,18 @@ export default function Home() {
     { value: 'thai', label: 'Thai', icon: '🇹🇭' },
     { value: 'french', label: 'French', icon: '🇫🇷' }
   ];
+
+  const handleDietaryPreferenceChange = (value) => {
+    setDietaryPreference(value);
+    
+    // Auto-select Nigerian cuisine for Nigerian dietary preferences
+    const nigerianDietaryOptions = ['traditional-nigerian', 'modern-nigerian', 'halal', 'no-pork'];
+    if (nigerianDietaryOptions.includes(value)) {
+      setCuisine('nigerian');
+    }
+  };
+
+  const isNigerianDietarySelected = ['traditional-nigerian', 'modern-nigerian', 'halal', 'no-pork'].includes(dietaryPreference);
 
   return (
     <div className="min-h-screen bg-[#f8fafc] font-sans pb-20">
@@ -311,7 +331,7 @@ export default function Home() {
                 label="Dietary Preference"
                 options={dietaryOptions}
                 value={dietaryPreference}
-                onChange={setDietaryPreference}
+                onChange={handleDietaryPreferenceChange}
                 placeholder="Select preference"
               />
             </div>
@@ -324,7 +344,13 @@ export default function Home() {
                 value={cuisine}
                 onChange={setCuisine}
                 placeholder="Select cuisine"
+                disabled={isNigerianDietarySelected}
               />
+              {isNigerianDietarySelected && (
+                <p className="mt-2 text-sm text-orange-600 font-medium">
+                  🇳🇬 Nigerian cuisine auto-selected for your dietary preference
+                </p>
+              )}
             </div>
 
             {/* Ingredients */}
