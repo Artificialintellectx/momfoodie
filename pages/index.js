@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
 import { ChefHat, Sparkles, Heart, MessageCircle, Home as HomeIcon, Utensils, Settings, ArrowRight, Star, Clock, Users, DollarSign, X, List, Info } from 'lucide-react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
@@ -119,6 +120,7 @@ const HeaderSkeleton = () => (
 );
 
 export default function Home() {
+  const router = useRouter();
   const [mealType, setMealType] = useState('breakfast');
   const [dietaryPreference, setDietaryPreference] = useState('any');
   const [cuisine, setCuisine] = useState('');
@@ -145,25 +147,42 @@ export default function Home() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    setSuggestions([]);
-    setAnimateCard(false);
-
-    try {
-      const aiSuggestions = await generateMultipleAISuggestions(
+    
+    // Check if we're on mobile (screen width < 768px)
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+    
+    if (isMobile) {
+      // On mobile, navigate to suggestions page with form data
+      const queryParams = new URLSearchParams({
         mealType,
         dietaryPreference,
         cuisine,
         ingredients,
-        suggestionCount
-      );
-      setSuggestions(aiSuggestions);
-      setTimeout(() => setAnimateCard(true), 100);
-    } catch (error) {
-      console.error('Error generating suggestions:', error);
-      alert('Failed to generate suggestions. Please try again.');
-    } finally {
-      setLoading(false);
+        suggestionCount: suggestionCount.toString()
+      });
+      router.push(`/suggestions?${queryParams.toString()}`);
+    } else {
+      // On desktop, keep the current behavior
+      setLoading(true);
+      setSuggestions([]);
+      setAnimateCard(false);
+
+      try {
+        const aiSuggestions = await generateMultipleAISuggestions(
+          mealType,
+          dietaryPreference,
+          cuisine,
+          ingredients,
+          suggestionCount
+        );
+        setSuggestions(aiSuggestions);
+        setTimeout(() => setAnimateCard(true), 100);
+      } catch (error) {
+        console.error('Error generating suggestions:', error);
+        alert('Failed to generate suggestions. Please try again.');
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -400,13 +419,15 @@ export default function Home() {
           </div>
         )}
 
-        {/* Suggestions Display */}
+        {/* Suggestions Display - Desktop Only */}
         {loading && (
-          <SuggestionsSkeleton />
+          <div className="hidden md:block">
+            <SuggestionsSkeleton />
+          </div>
         )}
         
         {suggestions.length > 0 && !loading && (
-          <div className={`bg-white rounded-2xl shadow-lg p-6 border border-gray-100 transition-all duration-500 ${
+          <div className={`hidden md:block bg-white rounded-2xl shadow-lg p-6 border border-gray-100 transition-all duration-500 ${
             animateCard ? 'animate-fade-in' : ''
           }`}>
             <div className="flex items-center gap-2 mb-6">
