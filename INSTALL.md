@@ -2,7 +2,7 @@
 
 ## Step 1: Install Dependencies
 ```bash
-cd momfoodie
+cd mummyfoodie
 npm install
 ```
 

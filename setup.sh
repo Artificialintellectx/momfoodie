@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# MomFoodie Setup Script
-echo "🍽️  Setting up MomFoodie..."
+# Mummyfoodie Setup Script
+echo "🍽️  Setting up Mummyfoodie..."
 
 # Check if Node.js is installed
 if ! command -v node &> /dev/null; then

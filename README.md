@@ -1,8 +1,8 @@
-# MomFoodie - Meal Suggestion App
+# Mummyfoodie - Meal Suggestion App
 
-A beautiful, responsive web application that helps you decide what to cook for breakfast, lunch, or dinner based on your dietary preferences. Features authentic Nigerian dishes alongside international options.
+A beautiful, modern, and smooth web application that helps you decide what to cook for breakfast, lunch, or dinner based on your dietary preferences. Features authentic Nigerian dishes alongside international options.
 
-![MomFoodie Screenshot](https://via.placeholder.com/800x400/ea580c/ffffff?text=MomFoodie+Meal+Suggestions)
+![Mummyfoodie Screenshot](https://via.placeholder.com/800x400/f472b6/ffffff?text=Mummyfoodie+Meal+Suggestions)
 
 ## 🌟 Features
 
@@ -158,7 +158,7 @@ The app uses a single table `meal_suggestions` with:
 
 ## 📱 Progressive Web App
 
-MomFoodie can be installed as a PWA on mobile devices:
+Mummyfoodie can be installed as a PWA on mobile devices:
 
 1. Open the app in your mobile browser
 2. Look for the "Add to Home Screen" option

@@ -1,6 +1,6 @@
 {
-  "name": "MomFoodie - Meal Suggestion App",
-  "short_name": "MomFoodie",
+  "name": "Mummyfoodie - Meal Suggestion App",
+  "short_name": "Mummyfoodie",
   "description": "Get personalized meal suggestions for breakfast, lunch, and dinner",
   "start_url": "/",
   "display": "standalone",
