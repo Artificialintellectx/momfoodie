@@ -4,6 +4,7 @@ import { ArrowLeft, Sparkles, Star, Clock, Users, DollarSign, Utensils } from 'l
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import { getSmartMealSuggestions, resetShownCounts } from '../lib/database-service';
+import RecipeModal from '../components/RecipeModal';
 
 // Loading Skeleton Components
 const SuggestionCardSkeleton = () => (
@@ -67,6 +68,8 @@ export default function Suggestions() {
     remaining: 0,
     totalShown: 0
   });
+  const [selectedRecipeId, setSelectedRecipeId] = useState(null);
+  const [isRecipeModalOpen, setIsRecipeModalOpen] = useState(false);
 
   useEffect(() => {
     // Get form data from URL query parameters
@@ -121,12 +124,18 @@ export default function Suggestions() {
   };
 
   const handleViewRecipe = (recipe) => {
-    // Navigate to the dedicated recipe page
-    router.push(`/recipe/${recipe.id}`);
+    // Open recipe modal instead of navigating to a separate page
+    setSelectedRecipeId(recipe.id);
+    setIsRecipeModalOpen(true);
   };
 
   const handleBack = () => {
     router.push('/');
+  };
+
+  const handleCloseRecipeModal = () => {
+    setIsRecipeModalOpen(false);
+    setSelectedRecipeId(null);
   };
 
   const handleLoadMoreSuggestions = async () => {
@@ -213,6 +222,12 @@ export default function Suggestions() {
             <p className="text-gray-600 text-sm">
               {router.query.dietaryPreference !== 'any' && `${router.query.dietaryPreference} • `}
               {router.query.cuisine && `${router.query.cuisine} cuisine`}
+              {router.query.ingredients && router.query.ingredients.trim() !== '' && (
+                <span className="inline-flex items-center gap-1 ml-2">
+                  <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                  Matching ingredients: {router.query.ingredients}
+                </span>
+              )}
             </p>
           </div>
         </div>
@@ -266,6 +281,27 @@ export default function Suggestions() {
                       <p className="text-gray-600 mb-4 leading-relaxed">
                         {suggestion.description}
                       </p>
+                      
+                      {/* Show matching ingredients if user specified ingredients */}
+                      {router.query.ingredients && router.query.ingredients.trim() !== '' && suggestion.ingredients && (
+                        <div className="mb-4">
+                          <p className="text-sm font-medium text-gray-700 mb-2">Available ingredients used:</p>
+                          <div className="flex flex-wrap gap-2">
+                            {suggestion.ingredients
+                              .filter(ingredient => 
+                                router.query.ingredients.toLowerCase().includes(ingredient.toLowerCase())
+                              )
+                              .map((ingredient, idx) => (
+                                <span
+                                  key={idx}
+                                  className="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full"
+                                >
+                                  {ingredient}
+                                </span>
+                              ))}
+                          </div>
+                        </div>
+                      )}
 
                       <div className="grid grid-cols-2 gap-3 mb-4">
                         <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -329,6 +365,27 @@ export default function Suggestions() {
                   <p className="text-gray-600 mb-4 leading-relaxed">
                     {suggestion.description}
                   </p>
+                  
+                  {/* Show matching ingredients if user specified ingredients */}
+                  {router.query.ingredients && router.query.ingredients.trim() !== '' && suggestion.ingredients && (
+                    <div className="mb-4">
+                      <p className="text-sm font-medium text-gray-700 mb-2">Available ingredients used:</p>
+                      <div className="flex flex-wrap gap-2">
+                        {suggestion.ingredients
+                          .filter(ingredient => 
+                            router.query.ingredients.toLowerCase().includes(ingredient.toLowerCase())
+                          )
+                          .map((ingredient, idx) => (
+                            <span
+                              key={idx}
+                              className="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full"
+                            >
+                              {ingredient}
+                            </span>
+                          ))}
+                      </div>
+                    </div>
+                  )}
 
                   <div className="grid grid-cols-4 gap-4 mb-4">
                     <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -397,6 +454,13 @@ export default function Suggestions() {
             )}
           </div>
         )}
+
+        {/* Recipe Modal */}
+        <RecipeModal
+          recipeId={selectedRecipeId}
+          isOpen={isRecipeModalOpen}
+          onClose={handleCloseRecipeModal}
+        />
       </div>
     </div>
   );

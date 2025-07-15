@@ -17,15 +17,15 @@ const FormSkeleton = () => (
         </div>
       </div>
       
-      {/* Dietary Preference Skeleton */}
-      <div>
-        <div className="h-4 bg-gray-200 rounded w-40 mb-3 skeleton-wave"></div>
-        <div className="h-14 bg-gray-100 rounded-xl skeleton-pulse"></div>
-      </div>
-      
       {/* Cuisine Skeleton */}
       <div>
         <div className="h-4 bg-gray-200 rounded w-36 mb-3 skeleton-wave"></div>
+        <div className="h-14 bg-gray-100 rounded-xl skeleton-pulse"></div>
+      </div>
+      
+      {/* Dietary Preference Skeleton */}
+      <div>
+        <div className="h-4 bg-gray-200 rounded w-40 mb-3 skeleton-wave"></div>
         <div className="h-14 bg-gray-100 rounded-xl skeleton-pulse"></div>
       </div>
       
@@ -121,7 +121,7 @@ export default function Home() {
   const router = useRouter();
   const [mealType, setMealType] = useState('breakfast');
   const [dietaryPreference, setDietaryPreference] = useState('any');
-  const [cuisine, setCuisine] = useState('');
+  const [cuisine, setCuisine] = useState('nigerian');
   const [ingredients, setIngredients] = useState('');
 
   const [showFeedback, setShowFeedback] = useState(false);
@@ -307,17 +307,6 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Dietary Preference */}
-            <div>
-              <CustomDropdown
-                label="Dietary Preference"
-                options={dietaryOptions}
-                value={dietaryPreference}
-                onChange={handleDietaryPreferenceChange}
-                placeholder="Select preference"
-              />
-            </div>
-
             {/* Cuisine Selection */}
             <div>
               <CustomDropdown
@@ -326,6 +315,17 @@ export default function Home() {
                 value={cuisine}
                 onChange={setCuisine}
                 placeholder="Select cuisine"
+              />
+            </div>
+
+            {/* Dietary Preference */}
+            <div>
+              <CustomDropdown
+                label="Dietary Preference"
+                options={dietaryOptions}
+                value={dietaryPreference}
+                onChange={handleDietaryPreferenceChange}
+                placeholder="Select preference"
               />
             </div>
 
