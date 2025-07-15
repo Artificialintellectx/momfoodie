@@ -1,8 +1,122 @@
 import { useState, useEffect } from 'react';
-import { ChefHat, Sparkles, Heart, MessageCircle, Home as HomeIcon, Utensils, Settings, ArrowRight, Star, Clock, Users, DollarSign } from 'lucide-react';
+import { ChefHat, Sparkles, Heart, MessageCircle, Home as HomeIcon, Utensils, Settings, ArrowRight, Star, Clock, Users, DollarSign, X, List, Info } from 'lucide-react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import { generateMultipleAISuggestions } from '../lib/ai-service';
+
+// Loading Skeleton Components
+const FormSkeleton = () => (
+  <div className="bg-white rounded-2xl shadow-lg p-6 mb-6 border border-gray-100">
+    <div className="space-y-6">
+      {/* Meal Type Skeleton */}
+      <div>
+        <div className="h-4 bg-gray-200 rounded w-48 mb-3 skeleton-wave"></div>
+        <div className="grid grid-cols-3 gap-3">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-20 bg-gray-100 rounded-xl skeleton-pulse"></div>
+          ))}
+        </div>
+      </div>
+      
+      {/* Dietary Preference Skeleton */}
+      <div>
+        <div className="h-4 bg-gray-200 rounded w-40 mb-3 skeleton-wave"></div>
+        <div className="h-14 bg-gray-100 rounded-xl skeleton-pulse"></div>
+      </div>
+      
+      {/* Cuisine Skeleton */}
+      <div>
+        <div className="h-4 bg-gray-200 rounded w-36 mb-3 skeleton-wave"></div>
+        <div className="h-14 bg-gray-100 rounded-xl skeleton-pulse"></div>
+      </div>
+      
+      {/* Ingredients Skeleton */}
+      <div>
+        <div className="h-4 bg-gray-200 rounded w-44 mb-3 skeleton-wave"></div>
+        <div className="h-24 bg-gray-100 rounded-xl skeleton-pulse"></div>
+      </div>
+      
+      {/* Suggestion Count Skeleton */}
+      <div>
+        <div className="h-4 bg-gray-200 rounded w-40 mb-3 skeleton-wave"></div>
+        <div className="flex gap-2">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="flex-1 h-12 bg-gray-100 rounded-xl skeleton-pulse"></div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+const SuggestionCardSkeleton = () => (
+  <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-6 border border-gray-200">
+    <div className="flex items-start justify-between mb-4">
+      <div className="h-6 bg-gray-200 rounded w-3/4 skeleton-wave"></div>
+      <div className="h-4 bg-gray-200 rounded w-8 skeleton-pulse"></div>
+    </div>
+    
+    <div className="space-y-2 mb-4">
+      <div className="h-4 bg-gray-200 rounded w-full skeleton-wave"></div>
+      <div className="h-4 bg-gray-200 rounded w-5/6 skeleton-wave"></div>
+      <div className="h-4 bg-gray-200 rounded w-4/6 skeleton-wave"></div>
+    </div>
+
+    <div className="grid grid-cols-2 gap-3 mb-4 md:grid-cols-4">
+      {[1, 2, 3, 4].map((i) => (
+        <div key={i} className="flex items-center gap-2">
+          <div className="w-4 h-4 bg-gray-200 rounded skeleton-pulse"></div>
+          <div className="h-3 bg-gray-200 rounded w-16 skeleton-wave"></div>
+        </div>
+      ))}
+    </div>
+
+    <div className="flex gap-2 mb-4">
+      {[1, 2, 3].map((i) => (
+        <div key={i} className="h-6 bg-gray-200 rounded-full w-16 skeleton-pulse"></div>
+      ))}
+    </div>
+
+    <div className="h-12 bg-gray-200 rounded-xl skeleton-wave"></div>
+  </div>
+);
+
+const SuggestionsSkeleton = () => (
+  <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+    <div className="flex items-center gap-2 mb-6">
+      <div className="p-2 bg-gray-200 rounded-full w-9 h-9 skeleton-pulse"></div>
+      <div className="h-7 bg-gray-200 rounded w-48 skeleton-wave"></div>
+    </div>
+
+    {/* Mobile Carousel Skeleton */}
+    <div className="md:hidden">
+      <div className="flex gap-4 overflow-x-auto pb-4">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="flex-shrink-0 w-80">
+            <SuggestionCardSkeleton />
+          </div>
+        ))}
+      </div>
+    </div>
+
+    {/* Desktop List Skeleton */}
+    <div className="hidden md:grid gap-6">
+      {[1, 2, 3].map((i) => (
+        <SuggestionCardSkeleton key={i} />
+      ))}
+    </div>
+  </div>
+);
+
+const HeaderSkeleton = () => (
+  <div className="text-center mb-8">
+    <div className="flex items-center justify-center gap-3 mb-4">
+      <div className="w-10 h-10 bg-gray-200 rounded-full skeleton-pulse"></div>
+      <div className="h-12 bg-gray-200 rounded w-48 skeleton-wave"></div>
+    </div>
+    <div className="h-6 bg-gray-200 rounded w-80 mx-auto skeleton-wave"></div>
+  </div>
+);
 
 export default function Home() {
   const [mealType, setMealType] = useState('breakfast');
@@ -17,7 +131,17 @@ export default function Home() {
   const [feedbackLoading, setFeedbackLoading] = useState(false);
   const [feedbackSent, setFeedbackSent] = useState(false);
   const [animateCard, setAnimateCard] = useState(false);
-  const [activeTab, setActiveTab] = useState('home');
+  const [selectedRecipe, setSelectedRecipe] = useState(null);
+  const [showRecipe, setShowRecipe] = useState(false);
+  const [pageLoading, setPageLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulate initial page load
+    const timer = setTimeout(() => {
+      setPageLoading(false);
+    }, 800);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -60,6 +184,11 @@ export default function Home() {
     }, 1000);
   };
 
+  const handleViewRecipe = (recipe) => {
+    setSelectedRecipe(recipe);
+    setShowRecipe(true);
+  };
+
   const mealTypeOptions = [
     { value: 'breakfast', label: 'Breakfast', icon: '🌅' },
     { value: 'lunch', label: 'Lunch', icon: '☀️' },
@@ -92,23 +221,30 @@ export default function Home() {
     <div className="min-h-screen bg-[#f8fafc] font-sans pb-20">
       <div className="container mx-auto px-4 py-6 max-w-2xl">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="relative">
-              <ChefHat className="w-10 h-10 text-orange-500 animate-bounce" />
-              <div className="absolute -top-1 -right-1 w-3 h-3 bg-orange-400 rounded-full animate-pulse"></div>
+        {pageLoading ? (
+          <HeaderSkeleton />
+        ) : (
+          <div className="text-center mb-8">
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <div className="relative">
+                <ChefHat className="w-10 h-10 text-orange-500 animate-bounce" />
+                <div className="absolute -top-1 -right-1 w-3 h-3 bg-orange-400 rounded-full animate-pulse"></div>
+              </div>
+              <h1 className="text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-orange-500 to-pink-500 bg-clip-text text-transparent">
+                Mummyfoodie
+              </h1>
             </div>
-            <h1 className="text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-orange-500 to-pink-500 bg-clip-text text-transparent">
-              Mummyfoodie
-            </h1>
+            <p className="text-gray-600 text-lg font-medium">
+              Never wonder what to cook again! Get personalized meal suggestions
+            </p>
           </div>
-          <p className="text-gray-600 text-lg font-medium">
-            Never wonder what to cook again! Get personalized meal suggestions
-          </p>
-        </div>
+        )}
 
         {/* Main Form */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 mb-6 border border-gray-100">
+        {pageLoading ? (
+          <FormSkeleton />
+        ) : (
+          <div className="bg-white rounded-2xl shadow-lg p-6 mb-6 border border-gray-100">
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Meal Type Selection */}
             <div>
@@ -208,14 +344,46 @@ export default function Home() {
             </div>
           </form>
         </div>
+        )}
 
         {/* Sticky Action Buttons */}
-        <div className="fixed bottom-20 left-4 right-4 z-40 md:hidden">
-          <div className="flex gap-3">
+        {!pageLoading && (
+          <div className="fixed bottom-6 left-4 right-4 z-40 md:hidden">
+            <div className="flex gap-3">
+              <button
+                onClick={handleSubmit}
+                disabled={loading}
+                className="flex-1 bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold py-4 px-6 rounded-2xl shadow-lg transform hover:scale-105 active:scale-95 transition-all duration-200 disabled:opacity-50 disabled:transform-none"
+              >
+                {loading ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Getting Suggestions...
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center gap-2">
+                    <Sparkles className="w-5 h-5" />
+                    Get Suggestions
+                  </div>
+                )}
+              </button>
+              <button
+                onClick={() => setShowFeedback(true)}
+                className="bg-white text-orange-500 font-bold py-4 px-4 rounded-2xl shadow-lg border-2 border-orange-200 transform hover:scale-105 active:scale-95 transition-all duration-200"
+              >
+                <MessageCircle className="w-6 h-6" />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Desktop Action Button */}
+        {!pageLoading && (
+          <div className="hidden md:block mb-8">
             <button
               onClick={handleSubmit}
               disabled={loading}
-              className="flex-1 bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold py-4 px-6 rounded-2xl shadow-lg transform hover:scale-105 active:scale-95 transition-all duration-200 disabled:opacity-50 disabled:transform-none"
+              className="w-full bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold py-4 px-8 rounded-2xl shadow-lg transform hover:scale-105 active:scale-95 transition-all duration-200 disabled:opacity-50 disabled:transform-none"
             >
               {loading ? (
                 <div className="flex items-center justify-center gap-2">
@@ -229,38 +397,15 @@ export default function Home() {
                 </div>
               )}
             </button>
-            <button
-              onClick={() => setShowFeedback(true)}
-              className="bg-white text-orange-500 font-bold py-4 px-4 rounded-2xl shadow-lg border-2 border-orange-200 transform hover:scale-105 active:scale-95 transition-all duration-200"
-            >
-              <MessageCircle className="w-6 h-6" />
-            </button>
           </div>
-        </div>
-
-        {/* Desktop Action Button */}
-        <div className="hidden md:block mb-8">
-          <button
-            onClick={handleSubmit}
-            disabled={loading}
-            className="w-full bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold py-4 px-8 rounded-2xl shadow-lg transform hover:scale-105 active:scale-95 transition-all duration-200 disabled:opacity-50 disabled:transform-none"
-          >
-            {loading ? (
-              <div className="flex items-center justify-center gap-2">
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                Getting Suggestions...
-              </div>
-            ) : (
-              <div className="flex items-center justify-center gap-2">
-                <Sparkles className="w-5 h-5" />
-                Get Suggestions
-              </div>
-            )}
-          </button>
-        </div>
+        )}
 
         {/* Suggestions Display */}
-        {suggestions.length > 0 && (
+        {loading && (
+          <SuggestionsSkeleton />
+        )}
+        
+        {suggestions.length > 0 && !loading && (
           <div className={`bg-white rounded-2xl shadow-lg p-6 border border-gray-100 transition-all duration-500 ${
             animateCard ? 'animate-fade-in' : ''
           }`}>
@@ -329,7 +474,10 @@ export default function Home() {
                         ))}
                       </div>
 
-                      <button className="w-full bg-orange-500 text-white font-semibold py-3 px-4 rounded-xl hover:bg-orange-600 transition-colors duration-200 transform hover:scale-105 active:scale-95">
+                      <button 
+                        onClick={() => handleViewRecipe(suggestion)}
+                        className="w-full bg-orange-500 text-white font-semibold py-3 px-4 rounded-xl hover:bg-orange-600 transition-colors duration-200 transform hover:scale-105 active:scale-95"
+                      >
                         View Recipe
                       </button>
                     </div>
@@ -389,7 +537,10 @@ export default function Home() {
                     ))}
                   </div>
 
-                  <button className="bg-orange-500 text-white font-semibold py-3 px-6 rounded-xl hover:bg-orange-600 transition-colors duration-200 transform hover:scale-105 active:scale-95">
+                  <button 
+                    onClick={() => handleViewRecipe(suggestion)}
+                    className="bg-orange-500 text-white font-semibold py-3 px-6 rounded-xl hover:bg-orange-600 transition-colors duration-200 transform hover:scale-105 active:scale-95"
+                  >
                     View Recipe
                   </button>
                 </div>
@@ -399,47 +550,136 @@ export default function Home() {
         )}
       </div>
 
-      {/* Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 md:hidden">
-        <div className="flex justify-around py-2">
-          <button
-            onClick={() => setActiveTab('home')}
-            className={`flex flex-col items-center py-2 px-4 rounded-xl transition-all duration-200 ${
-              activeTab === 'home' ? 'text-orange-500 bg-orange-50' : 'text-gray-500'
-            }`}
-          >
-            <HomeIcon className="w-6 h-6 mb-1" />
-            <span className="text-xs font-medium">Home</span>
-          </button>
-          <button
-            onClick={() => setActiveTab('suggestions')}
-            className={`flex flex-col items-center py-2 px-4 rounded-xl transition-all duration-200 ${
-              activeTab === 'suggestions' ? 'text-orange-500 bg-orange-50' : 'text-gray-500'
-            }`}
-          >
-            <Utensils className="w-6 h-6 mb-1" />
-            <span className="text-xs font-medium">Meals</span>
-          </button>
-          <button
-            onClick={() => setShowFeedback(true)}
-            className={`flex flex-col items-center py-2 px-4 rounded-xl transition-all duration-200 ${
-              activeTab === 'feedback' ? 'text-orange-500 bg-orange-50' : 'text-gray-500'
-            }`}
-          >
-            <MessageCircle className="w-6 h-6 mb-1" />
-            <span className="text-xs font-medium">Feedback</span>
-          </button>
-          <button
-            onClick={() => setActiveTab('settings')}
-            className={`flex flex-col items-center py-2 px-4 rounded-xl transition-all duration-200 ${
-              activeTab === 'settings' ? 'text-orange-500 bg-orange-50' : 'text-gray-500'
-            }`}
-          >
-            <Settings className="w-6 h-6 mb-1" />
-            <span className="text-xs font-medium">Settings</span>
-          </button>
+      {/* Recipe Modal */}
+      {showRecipe && selectedRecipe && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-3xl font-bold text-gray-900">{selectedRecipe.name}</h2>
+              <button
+                onClick={() => setShowRecipe(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors p-2"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            {/* Recipe Description */}
+            <div className="mb-6">
+              <p className="text-gray-600 leading-relaxed text-lg">
+                {selectedRecipe.description}
+              </p>
+            </div>
+
+            {/* Recipe Info Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+              <div className="bg-orange-50 rounded-xl p-4 text-center">
+                <Clock className="w-6 h-6 text-orange-500 mx-auto mb-2" />
+                <div className="text-sm text-gray-600">Prep Time</div>
+                <div className="font-semibold text-gray-900">{selectedRecipe.prep_time}</div>
+              </div>
+              <div className="bg-green-50 rounded-xl p-4 text-center">
+                <Users className="w-6 h-6 text-green-500 mx-auto mb-2" />
+                <div className="text-sm text-gray-600">Serves</div>
+                <div className="font-semibold text-gray-900">{selectedRecipe.serving_size}</div>
+              </div>
+              <div className="bg-blue-50 rounded-xl p-4 text-center">
+                <DollarSign className="w-6 h-6 text-blue-500 mx-auto mb-2" />
+                <div className="text-sm text-gray-600">Cost</div>
+                <div className="font-semibold text-gray-900">{selectedRecipe.estimated_cost}</div>
+              </div>
+              <div className="bg-purple-50 rounded-xl p-4 text-center">
+                <Utensils className="w-6 h-6 text-purple-500 mx-auto mb-2" />
+                <div className="text-sm text-gray-600">Difficulty</div>
+                <div className="font-semibold text-gray-900">{selectedRecipe.difficulty}</div>
+              </div>
+            </div>
+
+            {/* Ingredients */}
+            <div className="mb-8">
+              <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <List className="w-5 h-5 text-orange-500" />
+                Ingredients
+              </h3>
+              <div className="bg-gray-50 rounded-xl p-4">
+                <ul className="space-y-2">
+                  {selectedRecipe.ingredients.map((ingredient, index) => (
+                    <li key={index} className="flex items-center gap-3">
+                      <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                      <span className="text-gray-700">{ingredient}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            {/* Instructions */}
+            {selectedRecipe.instructions && selectedRecipe.instructions.length > 0 && (
+              <div className="mb-8">
+                <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <ChefHat className="w-5 h-5 text-orange-500" />
+                  Instructions
+                </h3>
+                <div className="space-y-4">
+                  {selectedRecipe.instructions.map((instruction, index) => (
+                    <div key={index} className="flex gap-4">
+                      <div className="flex-shrink-0 w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center font-bold text-sm">
+                        {index + 1}
+                      </div>
+                      <p className="text-gray-700 leading-relaxed">{instruction}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Nutrition Info */}
+            {selectedRecipe.nutrition_info && Object.keys(selectedRecipe.nutrition_info).length > 0 && (
+              <div className="mb-8">
+                <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <Info className="w-5 h-5 text-orange-500" />
+                  Nutrition Information
+                </h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {Object.entries(selectedRecipe.nutrition_info).map(([key, value]) => (
+                    <div key={key} className="bg-gray-50 rounded-xl p-3 text-center">
+                      <div className="text-sm text-gray-600 capitalize">{key}</div>
+                      <div className="font-semibold text-gray-900">{value}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Tags */}
+            {selectedRecipe.tags && selectedRecipe.tags.length > 0 && (
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">Tags</h3>
+                <div className="flex flex-wrap gap-2">
+                  {selectedRecipe.tags.map((tag, index) => (
+                    <span
+                      key={index}
+                      className="px-3 py-1 bg-orange-100 text-orange-700 text-sm font-medium rounded-full"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Close Button */}
+            <div className="flex justify-center">
+              <button
+                onClick={() => setShowRecipe(false)}
+                className="bg-orange-500 text-white font-semibold py-3 px-8 rounded-xl hover:bg-orange-600 transition-colors duration-200 transform hover:scale-105 active:scale-95"
+              >
+                Close Recipe
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Feedback Modal */}
       {showFeedback && (
