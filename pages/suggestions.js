@@ -172,7 +172,8 @@ export default function Suggestions() {
           totalAvailable: result.totalAvailable,
           requested: result.requested,
           actual: result.actual,
-          remaining: result.remaining
+          remaining: result.remaining,
+          totalShown: result.totalShown
         });
         
         // Reset animation for new suggestions
@@ -252,6 +253,9 @@ export default function Suggestions() {
               {suggestionMetadata.totalAvailable > 0 && (
                 <div className="text-sm text-gray-600 bg-gray-50 px-3 py-1 rounded-full">
                   {suggestionMetadata.totalShown} of {suggestionMetadata.totalAvailable} available
+                  {suggestions.some(s => s.is_ai_generated) && (
+                    <span className="ml-2 text-blue-600 font-medium">• AI Enhanced</span>
+                  )}
                 </div>
               )}
             </div>
@@ -274,7 +278,9 @@ export default function Suggestions() {
                         </h3>
                         <div className="flex items-center gap-1 text-orange-500">
                           <Star className="w-4 h-4 fill-current" />
-                          <span className="text-sm font-medium">DB</span>
+                          <span className="text-sm font-medium">
+                            {suggestion.is_ai_generated ? 'AI' : 'DB'}
+                          </span>
                         </div>
                       </div>
                       
@@ -358,7 +364,9 @@ export default function Suggestions() {
                     </h3>
                     <div className="flex items-center gap-1 text-orange-500">
                       <Star className="w-4 h-4 fill-current" />
-                      <span className="text-sm font-medium">DB</span>
+                      <span className="text-sm font-medium">
+                        {suggestion.is_ai_generated ? 'AI' : 'DB'}
+                      </span>
                     </div>
                   </div>
                   
@@ -427,6 +435,23 @@ export default function Suggestions() {
               ))}
             </div>
 
+            {/* AI Suggestions Info */}
+            {suggestions.length > 0 && suggestions.some(s => s.is_ai_generated) && (
+              <div className="mt-6 text-center">
+                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                  <div className="flex items-center justify-center gap-2 mb-2">
+                    <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
+                      <Sparkles className="w-4 h-4 text-blue-600" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-blue-900">AI-Enhanced Suggestions</h3>
+                  </div>
+                  <p className="text-blue-700 text-sm">
+                    You've explored all our database suggestions! Here are 12 fresh AI-generated meal ideas tailored to your preferences. Click "Get More AI Suggestions" to see them one by one.
+                  </p>
+                </div>
+              </div>
+            )}
+
             {/* New Suggestions Button */}
             {suggestions.length > 0 && hasMoreSuggestions && (
               <div className="mt-6 text-center">
@@ -443,12 +468,15 @@ export default function Suggestions() {
                   ) : (
                     <div className="flex items-center justify-center gap-2">
                       <Sparkles className="w-5 h-5" />
-                      Get New Suggestions
+                      {suggestions.some(s => s.is_ai_generated) ? 'Get More AI Suggestions' : 'Get New Suggestions'}
                     </div>
                   )}
                 </button>
                 <p className="text-sm text-gray-500 mt-2">
-                  Click to see different meal ideas for your preferences
+                  {suggestions.some(s => s.is_ai_generated) 
+                    ? 'Click to see more AI-generated meal ideas' 
+                    : 'Click to see different meal ideas for your preferences'
+                  }
                 </p>
               </div>
             )}

@@ -263,7 +263,7 @@ export default function Home() {
         ) : (
           <div className="text-center mb-8">
             <div className="flex items-center justify-center gap-3 mb-4">
-              <div className="relative">
+            <div className="relative">
                 <ChefHat className="w-10 h-10 text-orange-500 animate-bounce" />
                 <div className="absolute -top-1 -right-1 w-3 h-3 bg-orange-400 rounded-full animate-pulse"></div>
               </div>
@@ -283,11 +283,11 @@ export default function Home() {
         ) : (
           <div className="bg-white rounded-2xl shadow-lg p-6 mb-6 border border-gray-100">
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Meal Type Selection */}
+          {/* Meal Type Selection */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-3">
-                What meal are you planning?
-              </label>
+              What meal are you planning?
+            </label>
               <div className="grid grid-cols-3 gap-3">
                 {mealTypeOptions.map((option) => (
                   <button
@@ -302,10 +302,10 @@ export default function Home() {
                   >
                     <div className="text-2xl mb-1">{option.icon}</div>
                     <div className="text-sm font-medium">{option.label}</div>
-                  </button>
-                ))}
-              </div>
+                </button>
+              ))}
             </div>
+          </div>
 
             {/* Cuisine Selection */}
             <div>
@@ -327,7 +327,7 @@ export default function Home() {
                 onChange={handleDietaryPreferenceChange}
                 placeholder="Select preference"
               />
-            </div>
+        </div>
 
             {/* Ingredients */}
             <div>
@@ -342,7 +342,7 @@ export default function Home() {
                 rows="3"
               />
             </div>
-
+            
 
 
             {/* Desktop Submit Button */}
@@ -358,7 +358,7 @@ export default function Home() {
               </button>
             </div>
           </form>
-        </div>
+                  </div>
         )}
 
         {/* Sticky Action Buttons */}
