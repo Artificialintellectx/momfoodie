@@ -1,4 +1,10 @@
--- Create the meal_suggestions table with expanded dietary preferences
+-- Database Update Script for Mummyfoodie
+-- This script updates the existing database to support new dietary preferences
+
+-- Step 1: Drop the existing table (WARNING: This will delete all existing data)
+DROP TABLE IF EXISTS meal_suggestions CASCADE;
+
+-- Step 2: Recreate the table with expanded dietary preferences
 CREATE TABLE meal_suggestions (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -10,7 +16,7 @@ CREATE TABLE meal_suggestions (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- Insert sample Nigerian meal data with expanded dietary preferences
+-- Step 3: Insert all recipes with expanded dietary preferences
 INSERT INTO meal_suggestions (name, description, meal_type, dietary_preference, prep_time, ingredients) VALUES
 
 -- Breakfast options
@@ -164,17 +170,17 @@ INSERT INTO meal_suggestions (name, description, meal_type, dietary_preference, 
 ('Zobo', 'Hibiscus drink', 'breakfast', 'vegan', '15 mins', ARRAY['Hibiscus flowers', 'Ginger', 'Sugar', 'Water']),
 ('Palm Wine', 'Traditional palm wine', 'breakfast', 'vegan', '5 mins', ARRAY['Palm wine']);
 
--- Enable Row Level Security (optional)
+-- Step 4: Enable Row Level Security
 ALTER TABLE meal_suggestions ENABLE ROW LEVEL SECURITY;
 
--- Create a policy that allows anyone to read meal suggestions
+-- Step 5: Create a policy that allows anyone to read meal suggestions
 CREATE POLICY "Anyone can read meal suggestions" ON meal_suggestions
     FOR SELECT USING (true);
 
--- Create an index for faster queries
+-- Step 6: Create an index for faster queries
 CREATE INDEX idx_meal_suggestions_type_diet ON meal_suggestions(meal_type, dietary_preference);
 
--- Create a view for easy querying
+-- Step 7: Create a view for easy querying
 CREATE VIEW meal_suggestions_summary AS
 SELECT 
     meal_type,
@@ -184,3 +190,11 @@ SELECT
 FROM meal_suggestions
 GROUP BY meal_type, dietary_preference
 ORDER BY meal_type, dietary_preference;
+
+-- Step 8: Verify the update
+SELECT 
+    dietary_preference,
+    COUNT(*) as recipe_count
+FROM meal_suggestions 
+GROUP BY dietary_preference 
+ORDER BY dietary_preference; 

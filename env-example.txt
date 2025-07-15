@@ -13,4 +13,12 @@ EMAIL_USER=your-email@gmail.com
 EMAIL_PASS=your-app-password-here
 
 # Optional: Different recipient email (if you want feedback sent to a different address)
-# FEEDBACK_EMAIL=feedback@yourdomain.com 
+# FEEDBACK_EMAIL=feedback@yourdomain.com
+
+# Optional: External Recipe APIs (for additional recipe sources)
+# Edamam Recipe API (Free tier: 10 requests/minute, 100 requests/day)
+# NEXT_PUBLIC_EDAMAM_APP_ID=your-edamam-app-id
+# NEXT_PUBLIC_EDAMAM_APP_KEY=your-edamam-app-key
+
+# Spoonacular API (Free tier: 150 requests/day)
+# NEXT_PUBLIC_SPOONACULAR_API_KEY=your-spoonacular-api-key 

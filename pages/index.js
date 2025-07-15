@@ -1,9 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { ChefHat, Sparkles, Heart, MessageCircle, Home as HomeIcon, Utensils, Settings, ArrowRight, Star, Clock, Users, DollarSign, X, List, Info } from 'lucide-react';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import 'swiper/css';
-import { generateMultipleAISuggestions } from '../lib/ai-service';
 import CustomDropdown from '../components/CustomDropdown';
 
 // Loading Skeleton Components
@@ -126,16 +123,11 @@ export default function Home() {
   const [dietaryPreference, setDietaryPreference] = useState('any');
   const [cuisine, setCuisine] = useState('');
   const [ingredients, setIngredients] = useState('');
-  const [suggestions, setSuggestions] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [suggestionCount, setSuggestionCount] = useState(1);
+
   const [showFeedback, setShowFeedback] = useState(false);
   const [feedbackMessage, setFeedbackMessage] = useState('');
   const [feedbackLoading, setFeedbackLoading] = useState(false);
   const [feedbackSent, setFeedbackSent] = useState(false);
-  const [animateCard, setAnimateCard] = useState(false);
-  const [selectedRecipe, setSelectedRecipe] = useState(null);
-  const [showRecipe, setShowRecipe] = useState(false);
   const [pageLoading, setPageLoading] = useState(true);
   const [showDietaryDropdown, setShowDietaryDropdown] = useState(false);
   const [showCuisineDropdown, setShowCuisineDropdown] = useState(false);
@@ -164,42 +156,15 @@ export default function Home() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Check if we're on mobile (screen width < 768px)
-    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-    
-    if (isMobile) {
-      // On mobile, navigate to suggestions page with form data
-      const queryParams = new URLSearchParams({
-        mealType,
-        dietaryPreference,
-        cuisine,
-        ingredients,
-        suggestionCount: suggestionCount.toString()
-      });
-      router.push(`/suggestions?${queryParams.toString()}`);
-    } else {
-      // On desktop, keep the current behavior
-      setLoading(true);
-      setSuggestions([]);
-      setAnimateCard(false);
-
-      try {
-        const aiSuggestions = await generateMultipleAISuggestions(
-          mealType,
-          dietaryPreference,
-          cuisine,
-          ingredients,
-          suggestionCount
-        );
-        setSuggestions(aiSuggestions);
-        setTimeout(() => setAnimateCard(true), 100);
-      } catch (error) {
-        console.error('Error generating suggestions:', error);
-        alert('Failed to generate suggestions. Please try again.');
-      } finally {
-        setLoading(false);
-      }
-    }
+    // Navigate to suggestions page with form data for both mobile and desktop
+    const queryParams = new URLSearchParams({
+      mealType,
+      dietaryPreference,
+      cuisine,
+      ingredients,
+      suggestionCount: '1' // Default to 1 suggestion
+    });
+    router.push(`/suggestions?${queryParams.toString()}`);
   };
 
   const handleFeedbackSubmit = async (e) => {
@@ -248,10 +213,7 @@ export default function Home() {
     }
   };
 
-  const handleViewRecipe = (recipe) => {
-    setSelectedRecipe(recipe);
-    setShowRecipe(true);
-  };
+
 
   const mealTypeOptions = [
     { value: 'breakfast', label: 'Breakfast', icon: '🌅' },
@@ -260,20 +222,17 @@ export default function Home() {
   ];
 
   const dietaryOptions = [
-    { value: 'any', label: 'Any', icon: '🍽️' },
-    { value: 'vegetarian', label: 'Vegetarian', icon: '🥬' },
-    { value: 'vegan', label: 'Vegan', icon: '🌱' },
-    { value: 'gluten-free', label: 'Gluten-Free', icon: '🌾' },
-    { value: 'low-carb', label: 'Low-Carb', icon: '🥑' },
-    { value: 'high-protein', label: 'High-Protein', icon: '💪' },
-    { value: 'halal', label: 'Halal', icon: '☪️' },
-    { value: 'no-pork', label: 'No Pork', icon: '🐷' },
-    { value: 'no-beef', label: 'No Beef', icon: '🐄' },
-    { value: 'pescatarian', label: 'Pescatarian', icon: '🐟' },
-    { value: 'low-spice', label: 'Low Spice', icon: '🌶️' },
-    { value: 'no-seafood', label: 'No Seafood', icon: '🦐' },
-    { value: 'traditional-nigerian', label: 'Traditional Nigerian', icon: '🇳🇬' },
-    { value: 'modern-nigerian', label: 'Modern Nigerian', icon: '🍛' }
+    { value: 'any', label: 'Any Food', icon: '🍽️' },
+    { value: 'vegetarian', label: 'No Meat (Efo, Moi Moi)', icon: '🥬' },
+    { value: 'vegan', label: 'Plant-Based Only', icon: '🌱' },
+    { value: 'gluten-free', label: 'No Wheat (Yam, Rice)', icon: '🌾' },
+    { value: 'low-carb', label: 'Light Food (Soup, Pepper Soup)', icon: '🥑' },
+    { value: 'high-protein', label: 'Protein Rich (Fish, Meat)', icon: '💪' },
+    { value: 'halal', label: 'Halal (No Pork)', icon: '☪️' },
+    { value: 'pescatarian', label: 'Fish Only (No Meat)', icon: '🐟' },
+    { value: 'low-spice', label: 'Mild Spice (No Pepper)', icon: '🌶️' },
+    { value: 'traditional', label: 'Traditional Nigerian', icon: '🇳🇬' },
+    { value: 'modern', label: 'Modern Nigerian', icon: '🍛' }
   ];
 
   const cuisineOptions = [
@@ -291,15 +250,9 @@ export default function Home() {
 
   const handleDietaryPreferenceChange = (value) => {
     setDietaryPreference(value);
-    
-    // Auto-select Nigerian cuisine for Nigerian dietary preferences
-    const nigerianDietaryOptions = ['traditional-nigerian', 'modern-nigerian', 'halal', 'no-pork'];
-    if (nigerianDietaryOptions.includes(value)) {
-      setCuisine('nigerian');
-    }
   };
 
-  const isNigerianDietarySelected = ['traditional-nigerian', 'modern-nigerian', 'halal', 'no-pork'].includes(dietaryPreference);
+  const isNigerianDietarySelected = false;
 
   return (
     <div className="min-h-screen bg-[#f8fafc] font-sans pb-20">
@@ -373,13 +326,7 @@ export default function Home() {
                 value={cuisine}
                 onChange={setCuisine}
                 placeholder="Select cuisine"
-                disabled={isNigerianDietarySelected}
               />
-              {isNigerianDietarySelected && (
-                <p className="mt-2 text-sm text-orange-600 font-medium">
-                  🇳🇬 Nigerian cuisine auto-selected for your dietary preference
-                </p>
-              )}
             </div>
 
             {/* Ingredients */}
@@ -396,27 +343,19 @@ export default function Home() {
               />
             </div>
 
-            {/* Suggestion Count */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-3">
-                How many suggestions?
-              </label>
-              <div className="flex gap-2">
-                {[1, 3, 6].map((count) => (
-                  <button
-                    key={count}
-                    type="button"
-                    onClick={() => setSuggestionCount(count)}
-                    className={`flex-1 py-3 px-4 rounded-xl border-2 transition-all duration-200 transform hover:scale-105 active:scale-95 ${
-                      suggestionCount === count
-                        ? 'border-orange-500 bg-orange-500 text-white shadow-md'
-                        : 'border-gray-200 bg-white text-gray-600 hover:border-orange-300'
-                    }`}
-                  >
-                    {count}
-                  </button>
-                ))}
-              </div>
+
+
+            {/* Desktop Submit Button */}
+            <div className="hidden md:block">
+              <button
+                type="submit"
+                className="w-full bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold py-4 px-6 rounded-2xl shadow-lg transform hover:scale-105 active:scale-95 transition-all duration-200"
+              >
+                <div className="flex items-center justify-center gap-2">
+                  <Sparkles className="w-5 h-5" />
+                  Get Suggestions
+                </div>
+              </button>
             </div>
           </form>
         </div>
@@ -428,20 +367,12 @@ export default function Home() {
             <div className="flex gap-3">
               <button
                 onClick={handleSubmit}
-                disabled={loading}
-                className="flex-1 bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold py-4 px-6 rounded-2xl shadow-lg transform hover:scale-105 active:scale-95 transition-all duration-200 disabled:opacity-50 disabled:transform-none"
+                className="flex-1 bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold py-4 px-6 rounded-2xl shadow-lg transform hover:scale-105 active:scale-95 transition-all duration-200"
               >
-                {loading ? (
-                  <div className="flex items-center justify-center gap-2">
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    Getting Suggestions...
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-center gap-2">
-                    <Sparkles className="w-5 h-5" />
-                    Get Suggestions
-                  </div>
-                )}
+                <div className="flex items-center justify-center gap-2">
+                  <Sparkles className="w-5 h-5" />
+                  Get Suggestions
+                </div>
               </button>
               <button
                 onClick={() => setShowFeedback(true)}
@@ -453,311 +384,12 @@ export default function Home() {
           </div>
         )}
 
-        {/* Desktop Action Button */}
-        {!pageLoading && (
-          <div className="hidden md:block mb-8">
-            <button
-              onClick={handleSubmit}
-              disabled={loading}
-              className="w-full bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold py-4 px-8 rounded-2xl shadow-lg transform hover:scale-105 active:scale-95 transition-all duration-200 disabled:opacity-50 disabled:transform-none"
-            >
-              {loading ? (
-                <div className="flex items-center justify-center gap-2">
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  Getting Suggestions...
-                </div>
-              ) : (
-                <div className="flex items-center justify-center gap-2">
-                  <Sparkles className="w-5 h-5" />
-                  Get Suggestions
-                </div>
-              )}
-            </button>
-          </div>
-        )}
 
-        {/* Suggestions Display - Desktop Only */}
-        {loading && (
-          <div className="hidden md:block">
-            <SuggestionsSkeleton />
-          </div>
-        )}
-        
-        {suggestions.length > 0 && !loading && (
-          <div className={`hidden md:block bg-white rounded-2xl shadow-lg p-6 border border-gray-100 transition-all duration-500 ${
-            animateCard ? 'animate-fade-in' : ''
-          }`}>
-            <div className="flex items-center gap-2 mb-6">
-              <div className="p-2 bg-orange-100 rounded-full">
-                <Sparkles className="w-5 h-5 text-orange-500" />
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900">
-                Your Meal Suggestions
-              </h2>
-            </div>
 
-            {/* Mobile Carousel */}
-            <div className="md:hidden">
-              <Swiper
-                spaceBetween={20}
-                slidesPerView={1.2}
-                centeredSlides={true}
-                loop={false}
-                className="suggestion-swiper"
-              >
-                {suggestions.map((suggestion, index) => (
-                  <SwiperSlide key={index}>
-                    <div className="bg-gradient-to-br from-orange-50 to-pink-50 rounded-2xl p-6 border border-orange-100 transform hover:scale-105 transition-all duration-300">
-                      <div className="flex items-start justify-between mb-4">
-                        <h3 className="text-xl font-bold text-gray-900 flex-1">
-                          {suggestion.name}
-                        </h3>
-                        <div className="flex items-center gap-1 text-orange-500">
-                          <Star className="w-4 h-4 fill-current" />
-                          <span className="text-sm font-medium">AI</span>
-                        </div>
-                      </div>
-                      
-                      <p className="text-gray-600 mb-4 leading-relaxed">
-                        {suggestion.description}
-                      </p>
 
-                      <div className="grid grid-cols-2 gap-3 mb-4">
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <Clock className="w-4 h-4" />
-                          <span>{suggestion.prep_time}</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <Users className="w-4 h-4" />
-                          <span>{suggestion.serving_size}</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <DollarSign className="w-4 h-4" />
-                          <span>{suggestion.estimated_cost}</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <Utensils className="w-4 h-4" />
-                          <span>{suggestion.difficulty}</span>
-                        </div>
-                      </div>
-
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        {suggestion.tags.slice(0, 3).map((tag, tagIndex) => (
-                          <span
-                            key={tagIndex}
-                            className="px-3 py-1 bg-orange-100 text-orange-700 text-xs font-medium rounded-full"
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-
-                      <button 
-                        onClick={() => handleViewRecipe(suggestion)}
-                        className="w-full bg-orange-500 text-white font-semibold py-3 px-4 rounded-xl hover:bg-orange-600 transition-colors duration-200 transform hover:scale-105 active:scale-95"
-                      >
-                        View Recipe
-                      </button>
-                    </div>
-                  </SwiperSlide>
-                ))}
-              </Swiper>
-            </div>
-
-            {/* Desktop List */}
-            <div className="hidden md:grid gap-6">
-              {suggestions.map((suggestion, index) => (
-                <div
-                  key={index}
-                  className="bg-gradient-to-br from-orange-50 to-pink-50 rounded-2xl p-6 border border-orange-100 transform hover:scale-105 transition-all duration-300"
-                >
-                  <div className="flex items-start justify-between mb-4">
-                    <h3 className="text-xl font-bold text-gray-900 flex-1">
-                      {suggestion.name}
-                    </h3>
-                    <div className="flex items-center gap-1 text-orange-500">
-                      <Star className="w-4 h-4 fill-current" />
-                      <span className="text-sm font-medium">AI</span>
-                    </div>
-                  </div>
-                  
-                  <p className="text-gray-600 mb-4 leading-relaxed">
-                    {suggestion.description}
-                  </p>
-
-                  <div className="grid grid-cols-4 gap-4 mb-4">
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Clock className="w-4 h-4" />
-                      <span>{suggestion.prep_time}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Users className="w-4 h-4" />
-                      <span>{suggestion.serving_size}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <DollarSign className="w-4 h-4" />
-                      <span>{suggestion.estimated_cost}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Utensils className="w-4 h-4" />
-                      <span>{suggestion.difficulty}</span>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {suggestion.tags.slice(0, 3).map((tag, tagIndex) => (
-                      <span
-                        key={tagIndex}
-                        className="px-3 py-1 bg-orange-100 text-orange-700 text-xs font-medium rounded-full"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-
-                  <button 
-                    onClick={() => handleViewRecipe(suggestion)}
-                    className="bg-orange-500 text-white font-semibold py-3 px-6 rounded-xl hover:bg-orange-600 transition-colors duration-200 transform hover:scale-105 active:scale-95"
-                  >
-                    View Recipe
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
 
-      {/* Recipe Modal */}
-      {showRecipe && selectedRecipe && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-3xl font-bold text-gray-900">{selectedRecipe.name}</h2>
-              <button
-                onClick={() => setShowRecipe(false)}
-                className="text-gray-400 hover:text-gray-600 transition-colors p-2"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
 
-            {/* Recipe Description */}
-            <div className="mb-6">
-              <p className="text-gray-600 leading-relaxed text-lg">
-                {selectedRecipe.description}
-              </p>
-            </div>
-
-            {/* Recipe Info Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-              <div className="bg-orange-50 rounded-xl p-4 text-center">
-                <Clock className="w-6 h-6 text-orange-500 mx-auto mb-2" />
-                <div className="text-sm text-gray-600">Prep Time</div>
-                <div className="font-semibold text-gray-900">{selectedRecipe.prep_time}</div>
-              </div>
-              <div className="bg-green-50 rounded-xl p-4 text-center">
-                <Users className="w-6 h-6 text-green-500 mx-auto mb-2" />
-                <div className="text-sm text-gray-600">Serves</div>
-                <div className="font-semibold text-gray-900">{selectedRecipe.serving_size}</div>
-              </div>
-              <div className="bg-blue-50 rounded-xl p-4 text-center">
-                <DollarSign className="w-6 h-6 text-blue-500 mx-auto mb-2" />
-                <div className="text-sm text-gray-600">Cost</div>
-                <div className="font-semibold text-gray-900">{selectedRecipe.estimated_cost}</div>
-              </div>
-              <div className="bg-purple-50 rounded-xl p-4 text-center">
-                <Utensils className="w-6 h-6 text-purple-500 mx-auto mb-2" />
-                <div className="text-sm text-gray-600">Difficulty</div>
-                <div className="font-semibold text-gray-900">{selectedRecipe.difficulty}</div>
-              </div>
-            </div>
-
-            {/* Ingredients */}
-            <div className="mb-8">
-              <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                <List className="w-5 h-5 text-orange-500" />
-                Ingredients
-              </h3>
-              <div className="bg-gray-50 rounded-xl p-4">
-                <ul className="space-y-2">
-                  {selectedRecipe.ingredients.map((ingredient, index) => (
-                    <li key={index} className="flex items-center gap-3">
-                      <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                      <span className="text-gray-700">{ingredient}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-
-            {/* Instructions */}
-            {selectedRecipe.instructions && selectedRecipe.instructions.length > 0 && (
-              <div className="mb-8">
-                <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                  <ChefHat className="w-5 h-5 text-orange-500" />
-                  Instructions
-                </h3>
-                <div className="space-y-4">
-                  {selectedRecipe.instructions.map((instruction, index) => (
-                    <div key={index} className="flex gap-4">
-                      <div className="flex-shrink-0 w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center font-bold text-sm">
-                        {index + 1}
-                      </div>
-                      <p className="text-gray-700 leading-relaxed">{instruction}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Nutrition Info */}
-            {selectedRecipe.nutrition_info && Object.keys(selectedRecipe.nutrition_info).length > 0 && (
-              <div className="mb-8">
-                <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                  <Info className="w-5 h-5 text-orange-500" />
-                  Nutrition Information
-                </h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {Object.entries(selectedRecipe.nutrition_info).map(([key, value]) => (
-                    <div key={key} className="bg-gray-50 rounded-xl p-3 text-center">
-                      <div className="text-sm text-gray-600 capitalize">{key}</div>
-                      <div className="font-semibold text-gray-900">{value}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Tags */}
-            {selectedRecipe.tags && selectedRecipe.tags.length > 0 && (
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">Tags</h3>
-                <div className="flex flex-wrap gap-2">
-                  {selectedRecipe.tags.map((tag, index) => (
-                    <span
-                      key={index}
-                      className="px-3 py-1 bg-orange-100 text-orange-700 text-sm font-medium rounded-full"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Close Button */}
-            <div className="flex justify-center">
-              <button
-                onClick={() => setShowRecipe(false)}
-                className="bg-orange-500 text-white font-semibold py-3 px-8 rounded-xl hover:bg-orange-600 transition-colors duration-200 transform hover:scale-105 active:scale-95"
-              >
-                Close Recipe
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Feedback Modal */}
       {showFeedback && (

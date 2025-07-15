@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { ArrowLeft, Sparkles, Star, Clock, Users, DollarSign, Utensils, X, List, Info, ChefHat } from 'lucide-react';
+import { ArrowLeft, Sparkles, Star, Clock, Users, DollarSign, Utensils } from 'lucide-react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
-import { generateMultipleAISuggestions } from '../lib/ai-service';
+import { getSmartMealSuggestions, resetShownCounts } from '../lib/database-service';
 
 // Loading Skeleton Components
 const SuggestionCardSkeleton = () => (
@@ -58,8 +58,15 @@ export default function Suggestions() {
   const [suggestions, setSuggestions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [animateCard, setAnimateCard] = useState(false);
-  const [selectedRecipe, setSelectedRecipe] = useState(null);
-  const [showRecipe, setShowRecipe] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMoreSuggestions, setHasMoreSuggestions] = useState(true);
+  const [suggestionMetadata, setSuggestionMetadata] = useState({
+    totalAvailable: 0,
+    requested: 0,
+    actual: 0,
+    remaining: 0,
+    totalShown: 0
+  });
 
   useEffect(() => {
     // Get form data from URL query parameters
@@ -81,31 +88,93 @@ export default function Suggestions() {
     setSuggestions([]);
     setAnimateCard(false);
 
+    // Reset shown counts for this criteria when first loading
+    resetShownCounts(mealType, dietaryPreference, cuisine, ingredients);
+
     try {
-      const aiSuggestions = await generateMultipleAISuggestions(
+      const result = await getSmartMealSuggestions(
         mealType,
         dietaryPreference,
         cuisine,
         ingredients,
-        suggestionCount
+        suggestionCount,
+        false // First load, not getting new suggestions
       );
-      setSuggestions(aiSuggestions);
+      
+      setSuggestions(result.suggestions);
+      setHasMoreSuggestions(result.hasMore);
+      setSuggestionMetadata({
+        totalAvailable: result.totalAvailable,
+        requested: result.requested,
+        actual: result.actual,
+        remaining: result.remaining,
+        totalShown: result.totalShown
+      });
+      
       setTimeout(() => setAnimateCard(true), 100);
     } catch (error) {
-      console.error('Error generating suggestions:', error);
-      alert('Failed to generate suggestions. Please try again.');
+      console.error('Error fetching suggestions:', error);
+      alert('Failed to fetch suggestions. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
   const handleViewRecipe = (recipe) => {
-    setSelectedRecipe(recipe);
-    setShowRecipe(true);
+    // Navigate to the dedicated recipe page
+    router.push(`/recipe/${recipe.id}`);
   };
 
   const handleBack = () => {
     router.push('/');
+  };
+
+  const handleLoadMoreSuggestions = async () => {
+    setLoadingMore(true);
+    
+    try {
+      const {
+        mealType = 'breakfast',
+        dietaryPreference = 'any',
+        cuisine = '',
+        ingredients = ''
+      } = router.query;
+
+      // Get the same number of suggestions as the original request
+      const originalCount = parseInt(router.query.suggestionCount) || 1;
+      
+      // Get new suggestions (replacing current ones)
+      const result = await getSmartMealSuggestions(
+        mealType,
+        dietaryPreference,
+        cuisine,
+        ingredients,
+        originalCount, // Get the same number as original request
+        true // Get new suggestions with randomization
+      );
+
+      if (result.suggestions.length === 0) {
+        setHasMoreSuggestions(false);
+      } else {
+        // Replace current suggestions with new ones
+        setSuggestions(result.suggestions);
+        setHasMoreSuggestions(result.hasMore);
+        setSuggestionMetadata({
+          totalAvailable: result.totalAvailable,
+          requested: result.requested,
+          actual: result.actual,
+          remaining: result.remaining
+        });
+        
+        // Reset animation for new suggestions
+        setAnimateCard(false);
+        setTimeout(() => setAnimateCard(true), 100);
+      }
+    } catch (error) {
+      console.error('Error loading more suggestions:', error);
+    } finally {
+      setLoadingMore(false);
+    }
   };
 
   const getMealTypeIcon = (mealType) => {
@@ -156,13 +225,20 @@ export default function Suggestions() {
           <div className={`bg-white rounded-2xl shadow-lg p-6 border border-gray-100 transition-all duration-500 ${
             animateCard ? 'animate-fade-in' : ''
           }`}>
-            <div className="flex items-center gap-2 mb-6">
-              <div className="p-2 bg-orange-100 rounded-full">
-                <Sparkles className="w-5 h-5 text-orange-500" />
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-orange-100 rounded-full">
+                  <Sparkles className="w-5 h-5 text-orange-500" />
+                </div>
+                <h2 className="text-2xl font-bold text-gray-900">
+                  Your Meal Suggestions
+                </h2>
               </div>
-              <h2 className="text-2xl font-bold text-gray-900">
-                Your Meal Suggestions
-              </h2>
+              {suggestionMetadata.totalAvailable > 0 && (
+                <div className="text-sm text-gray-600 bg-gray-50 px-3 py-1 rounded-full">
+                  {suggestionMetadata.totalShown} of {suggestionMetadata.totalAvailable} available
+                </div>
+              )}
             </div>
 
             {/* Mobile Carousel */}
@@ -183,7 +259,7 @@ export default function Suggestions() {
                         </h3>
                         <div className="flex items-center gap-1 text-orange-500">
                           <Star className="w-4 h-4 fill-current" />
-                          <span className="text-sm font-medium">AI</span>
+                          <span className="text-sm font-medium">DB</span>
                         </div>
                       </div>
                       
@@ -246,7 +322,7 @@ export default function Suggestions() {
                     </h3>
                     <div className="flex items-center gap-1 text-orange-500">
                       <Star className="w-4 h-4 fill-current" />
-                      <span className="text-sm font-medium">AI</span>
+                      <span className="text-sm font-medium">DB</span>
                     </div>
                   </div>
                   
@@ -293,137 +369,32 @@ export default function Suggestions() {
                 </div>
               ))}
             </div>
-          </div>
-        )}
 
-        {/* Recipe Modal */}
-        {showRecipe && selectedRecipe && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-3xl font-bold text-gray-900">{selectedRecipe.name}</h2>
+            {/* New Suggestions Button */}
+            {suggestions.length > 0 && hasMoreSuggestions && (
+              <div className="mt-6 text-center">
                 <button
-                  onClick={() => setShowRecipe(false)}
-                  className="text-gray-400 hover:text-gray-600 transition-colors p-2"
+                  onClick={handleLoadMoreSuggestions}
+                  disabled={loadingMore}
+                  className="bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold py-4 px-8 rounded-2xl shadow-lg transform hover:scale-105 active:scale-95 transition-all duration-200 disabled:opacity-50 disabled:transform-none"
                 >
-                  <X className="w-6 h-6" />
+                  {loadingMore ? (
+                    <div className="flex items-center justify-center gap-2">
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      Loading New Suggestions...
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center gap-2">
+                      <Sparkles className="w-5 h-5" />
+                      Get New Suggestions
+                    </div>
+                  )}
                 </button>
-              </div>
-
-              {/* Recipe Description */}
-              <div className="mb-6">
-                <p className="text-gray-600 leading-relaxed text-lg">
-                  {selectedRecipe.description}
+                <p className="text-sm text-gray-500 mt-2">
+                  Click to see different meal ideas for your preferences
                 </p>
               </div>
-
-              {/* Recipe Info Grid */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                <div className="bg-orange-50 rounded-xl p-4 text-center">
-                  <Clock className="w-6 h-6 text-orange-500 mx-auto mb-2" />
-                  <div className="text-sm text-gray-600">Prep Time</div>
-                  <div className="font-semibold text-gray-900">{selectedRecipe.prep_time}</div>
-                </div>
-                <div className="bg-green-50 rounded-xl p-4 text-center">
-                  <Users className="w-6 h-6 text-green-500 mx-auto mb-2" />
-                  <div className="text-sm text-gray-600">Serves</div>
-                  <div className="font-semibold text-gray-900">{selectedRecipe.serving_size}</div>
-                </div>
-                <div className="bg-blue-50 rounded-xl p-4 text-center">
-                  <DollarSign className="w-6 h-6 text-blue-500 mx-auto mb-2" />
-                  <div className="text-sm text-gray-600">Cost</div>
-                  <div className="font-semibold text-gray-900">{selectedRecipe.estimated_cost}</div>
-                </div>
-                <div className="bg-purple-50 rounded-xl p-4 text-center">
-                  <Utensils className="w-6 h-6 text-purple-500 mx-auto mb-2" />
-                  <div className="text-sm text-gray-600">Difficulty</div>
-                  <div className="font-semibold text-gray-900">{selectedRecipe.difficulty}</div>
-                </div>
-              </div>
-
-              {/* Ingredients */}
-              <div className="mb-8">
-                <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                  <List className="w-5 h-5 text-orange-500" />
-                  Ingredients
-                </h3>
-                <div className="bg-gray-50 rounded-xl p-4">
-                  <ul className="space-y-2">
-                    {selectedRecipe.ingredients.map((ingredient, index) => (
-                      <li key={index} className="flex items-center gap-3">
-                        <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                        <span className="text-gray-700">{ingredient}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-
-              {/* Instructions */}
-              {selectedRecipe.instructions && selectedRecipe.instructions.length > 0 && (
-                <div className="mb-8">
-                  <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                    <ChefHat className="w-5 h-5 text-orange-500" />
-                    Instructions
-                  </h3>
-                  <div className="space-y-4">
-                    {selectedRecipe.instructions.map((instruction, index) => (
-                      <div key={index} className="flex gap-4">
-                        <div className="flex-shrink-0 w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center font-bold text-sm">
-                          {index + 1}
-                        </div>
-                        <p className="text-gray-700 leading-relaxed">{instruction}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Nutrition Info */}
-              {selectedRecipe.nutrition_info && Object.keys(selectedRecipe.nutrition_info).length > 0 && (
-                <div className="mb-8">
-                  <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                    <Info className="w-5 h-5 text-orange-500" />
-                    Nutrition Information
-                  </h3>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {Object.entries(selectedRecipe.nutrition_info).map(([key, value]) => (
-                      <div key={key} className="bg-gray-50 rounded-xl p-3 text-center">
-                        <div className="text-sm text-gray-600 capitalize">{key}</div>
-                        <div className="font-semibold text-gray-900">{value}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Tags */}
-              {selectedRecipe.tags && selectedRecipe.tags.length > 0 && (
-                <div className="mb-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-3">Tags</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedRecipe.tags.map((tag, index) => (
-                      <span
-                        key={index}
-                        className="px-3 py-1 bg-orange-100 text-orange-700 text-sm font-medium rounded-full"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Close Button */}
-              <div className="flex justify-center">
-                <button
-                  onClick={() => setShowRecipe(false)}
-                  className="bg-orange-500 text-white font-semibold py-3 px-8 rounded-xl hover:bg-orange-600 transition-colors duration-200 transform hover:scale-105 active:scale-95"
-                >
-                  Close Recipe
-                </button>
-              </div>
-            </div>
+            )}
           </div>
         )}
       </div>
