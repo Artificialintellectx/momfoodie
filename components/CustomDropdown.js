@@ -56,7 +56,7 @@ export default function CustomDropdown({ options, value, onChange, placeholder =
           ) : (
             <span className="text-lg text-gray-400 flex-shrink-0">•</span>
           )}
-          <span className={`truncate ${selected ? 'text-gray-900 font-medium' : 'text-gray-400'}`}>
+          <span className={`min-w-0 break-words ${selected ? 'text-gray-900 font-medium' : 'text-gray-400'}`}>
             {selected ? selected.label : placeholder}
           </span>
         </div>
@@ -76,16 +76,16 @@ export default function CustomDropdown({ options, value, onChange, placeholder =
       {/* Mobile Dropdown - Centered */}
       {open && !disabled && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:hidden">
-          <div className="bg-white/95 backdrop-blur-xl border-2 border-gray-100 rounded-2xl shadow-2xl py-4 w-full max-w-sm max-h-80 overflow-y-auto">
+          <div className="bg-white/95 backdrop-blur-xl border-2 border-gray-100 rounded-2xl shadow-2xl py-4 w-full max-w-xs max-h-80 overflow-y-auto overflow-x-hidden">
             <div className="px-4 pb-2 border-b border-gray-100">
-              <h3 className="text-lg font-semibold text-gray-900">{label}</h3>
+              <h3 className="text-lg font-semibold text-gray-900 break-words">{label}</h3>
             </div>
             <div className="py-2">
               {options.map((option) => (
                 <button
                   key={option.value}
                   type="button"
-                  className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors duration-150 hover:bg-orange-50 focus:bg-orange-100 rounded-xl mx-2 ${
+                  className={`w-full flex items-start gap-3 px-4 py-3 text-left transition-colors duration-150 hover:bg-orange-50 focus:bg-orange-100 rounded-xl mx-2 ${
                     value === option.value ? 'bg-orange-100 text-orange-700 font-semibold' : 'text-gray-700'
                   }`}
                   onClick={() => {
@@ -93,10 +93,10 @@ export default function CustomDropdown({ options, value, onChange, placeholder =
                     setOpen(false);
                   }}
                 >
-                  <span className="text-lg flex-shrink-0">{option.icon}</span>
-                  <span className="font-medium truncate flex-1">{option.label}</span>
+                  <span className="text-lg flex-shrink-0 mt-0.5">{option.icon}</span>
+                  <span className="font-medium break-words flex-1 leading-relaxed min-w-0">{option.label}</span>
                   {value === option.value && (
-                    <svg className="w-5 h-5 text-orange-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <svg className="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
                   )}
@@ -115,7 +115,7 @@ export default function CustomDropdown({ options, value, onChange, placeholder =
               <button
                 key={option.value}
                 type="button"
-                className={`w-full flex items-center gap-3 px-5 py-3 text-left transition-colors duration-150 hover:bg-orange-50 focus:bg-orange-100 rounded-xl ${
+                className={`w-full flex items-start gap-3 px-5 py-3 text-left transition-colors duration-150 hover:bg-orange-50 focus:bg-orange-100 rounded-xl ${
                   value === option.value ? 'bg-orange-100 text-orange-700 font-semibold' : 'text-gray-700'
                 }`}
                 onClick={() => {
@@ -123,10 +123,10 @@ export default function CustomDropdown({ options, value, onChange, placeholder =
                   setOpen(false);
                 }}
               >
-                <span className="text-lg flex-shrink-0">{option.icon}</span>
-                <span className="font-medium truncate flex-1">{option.label}</span>
+                <span className="text-lg flex-shrink-0 mt-0.5">{option.icon}</span>
+                <span className="font-medium break-words flex-1 leading-relaxed">{option.label}</span>
                 {value === option.value && (
-                  <svg className="w-5 h-5 text-orange-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                 )}

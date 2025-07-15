@@ -206,17 +206,46 @@ export default function Home() {
     e.preventDefault();
     setFeedbackLoading(true);
     
-    // Simulate feedback submission
-    setTimeout(() => {
-      console.log('Feedback submitted:', feedbackMessage);
+    try {
+      // Send feedback to your email or database
+      const feedbackData = {
+        message: feedbackMessage,
+        timestamp: new Date().toISOString(),
+        userAgent: navigator.userAgent,
+        url: window.location.href
+      };
+
+      // Send feedback via API route
+      const response = await fetch('/api/feedback', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(feedbackData)
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to send feedback');
+      }
+
+      const result = await response.json();
+      console.log('Feedback sent successfully:', result);
+      
       setFeedbackSent(true);
       setFeedbackLoading(false);
+      
+      // Show success message
       setTimeout(() => {
         setShowFeedback(false);
         setFeedbackSent(false);
         setFeedbackMessage('');
-      }, 2000);
-    }, 1000);
+      }, 3000);
+      
+    } catch (error) {
+      console.error('Failed to send feedback:', error);
+      setFeedbackLoading(false);
+      // You could show an error message here
+    }
   };
 
   const handleViewRecipe = (recipe) => {
