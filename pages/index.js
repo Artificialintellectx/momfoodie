@@ -314,7 +314,7 @@ export default function Home() {
                 <ChefHat className="w-10 h-10 text-orange-500 animate-bounce" />
                 <div className="absolute -top-1 -right-1 w-3 h-3 bg-orange-400 rounded-full animate-pulse"></div>
               </div>
-              <h1 className="text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-orange-500 to-pink-500 bg-clip-text text-transparent">
+              <h1 className="text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-orange-500 to-pink-500 bg-clip-text text-transparent" style={{ fontFamily: 'Fredoka One, cursive' }}>
                 Mummyfoodie
               </h1>
             </div>
