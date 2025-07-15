@@ -4,6 +4,7 @@ import { ChefHat, Sparkles, Heart, MessageCircle, Home as HomeIcon, Utensils, Se
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import { generateMultipleAISuggestions } from '../lib/ai-service';
+import CustomDropdown from '../components/CustomDropdown';
 
 // Loading Skeleton Components
 const FormSkeleton = () => (
@@ -136,6 +137,8 @@ export default function Home() {
   const [selectedRecipe, setSelectedRecipe] = useState(null);
   const [showRecipe, setShowRecipe] = useState(false);
   const [pageLoading, setPageLoading] = useState(true);
+  const [showDietaryDropdown, setShowDietaryDropdown] = useState(false);
+  const [showCuisineDropdown, setShowCuisineDropdown] = useState(false);
 
   useEffect(() => {
     // Simulate initial page load
@@ -143,6 +146,19 @@ export default function Home() {
       setPageLoading(false);
     }, 800);
     return () => clearTimeout(timer);
+  }, []);
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest('.dropdown-container')) {
+        setShowDietaryDropdown(false);
+        setShowCuisineDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const handleSubmit = async (e) => {
@@ -215,25 +231,25 @@ export default function Home() {
   ];
 
   const dietaryOptions = [
-    { value: 'any', label: 'Any' },
-    { value: 'vegetarian', label: 'Vegetarian' },
-    { value: 'vegan', label: 'Vegan' },
-    { value: 'gluten-free', label: 'Gluten-Free' },
-    { value: 'low-carb', label: 'Low-Carb' },
-    { value: 'high-protein', label: 'High-Protein' }
+    { value: 'any', label: 'Any', icon: '🍽️' },
+    { value: 'vegetarian', label: 'Vegetarian', icon: '🥬' },
+    { value: 'vegan', label: 'Vegan', icon: '🌱' },
+    { value: 'gluten-free', label: 'Gluten-Free', icon: '🌾' },
+    { value: 'low-carb', label: 'Low-Carb', icon: '🥑' },
+    { value: 'high-protein', label: 'High-Protein', icon: '💪' }
   ];
 
   const cuisineOptions = [
-    { value: '', label: 'Any Cuisine' },
-    { value: 'nigerian', label: 'Nigerian', popular: true },
-    { value: 'italian', label: 'Italian' },
-    { value: 'chinese', label: 'Chinese' },
-    { value: 'mexican', label: 'Mexican' },
-    { value: 'indian', label: 'Indian' },
-    { value: 'mediterranean', label: 'Mediterranean' },
-    { value: 'japanese', label: 'Japanese' },
-    { value: 'thai', label: 'Thai' },
-    { value: 'french', label: 'French' }
+    { value: '', label: 'Any Cuisine', icon: '🌍' },
+    { value: 'nigerian', label: 'Nigerian', icon: '🇳🇬', popular: true },
+    { value: 'italian', label: 'Italian', icon: '🇮🇹' },
+    { value: 'chinese', label: 'Chinese', icon: '🇨🇳' },
+    { value: 'mexican', label: 'Mexican', icon: '🇲🇽' },
+    { value: 'indian', label: 'Indian', icon: '🇮🇳' },
+    { value: 'mediterranean', label: 'Mediterranean', icon: '🌊' },
+    { value: 'japanese', label: 'Japanese', icon: '🇯🇵' },
+    { value: 'thai', label: 'Thai', icon: '🇹🇭' },
+    { value: 'french', label: 'French', icon: '🇫🇷' }
   ];
 
   return (
@@ -291,38 +307,24 @@ export default function Home() {
 
             {/* Dietary Preference */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-3">
-                Dietary Preference
-              </label>
-              <select
+              <CustomDropdown
+                label="Dietary Preference"
+                options={dietaryOptions}
                 value={dietaryPreference}
-                onChange={(e) => setDietaryPreference(e.target.value)}
-                className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:outline-none transition-all duration-200 bg-white"
-              >
-                {dietaryOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
+                onChange={setDietaryPreference}
+                placeholder="Select preference"
+              />
             </div>
 
             {/* Cuisine Selection */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-3">
-                Preferred Cuisine
-              </label>
-              <select
+              <CustomDropdown
+                label="Preferred Cuisine"
+                options={cuisineOptions}
                 value={cuisine}
-                onChange={(e) => setCuisine(e.target.value)}
-                className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:outline-none transition-all duration-200 bg-white"
-              >
-                {cuisineOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label} {option.popular && '🔥'}
-                  </option>
-                ))}
-              </select>
+                onChange={setCuisine}
+                placeholder="Select cuisine"
+              />
             </div>
 
             {/* Ingredients */}
