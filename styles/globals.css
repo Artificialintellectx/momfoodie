@@ -250,6 +250,52 @@ html {
   background-clip: text;
 }
 
+/* Loading stage animations */
+@keyframes stage-progress {
+  0% {
+    width: 0%;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+@keyframes stage-glow {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
+  }
+}
+
+@keyframes stage-bounce {
+  0%, 20%, 53%, 80%, 100% {
+    transform: translate3d(0, 0, 0);
+  }
+  40%, 43% {
+    transform: translate3d(0, -8px, 0);
+  }
+  70% {
+    transform: translate3d(0, -4px, 0);
+  }
+  90% {
+    transform: translate3d(0, -2px, 0);
+  }
+}
+
+.animate-stage-progress {
+  animation: stage-progress 2s ease-out;
+}
+
+.animate-stage-glow {
+  animation: stage-glow 2s ease-in-out infinite;
+}
+
+.animate-stage-bounce {
+  animation: stage-bounce 1s ease-out;
+}
+
 @keyframes gradient-shift {
   0% {
     background-position: 0% 50%;

@@ -1,11 +1,238 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/router';
-import { ArrowLeft, Sparkles, Star, Clock, Users, DollarSign, Utensils } from 'lucide-react';
+import { ArrowLeft, Sparkles, Star, Clock, Users, DollarSign, Utensils, ChefHat, Heart, Globe } from 'lucide-react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import { getSmartMealSuggestions, resetShownCounts } from '../lib/database-service';
 import { pregenerateAISuggestions } from '../lib/database-service';
 import RecipeModal from '../components/RecipeModal';
+
+// Helper function for cuisine display names
+const getCuisineDisplayName = (cuisine) => {
+  const cuisineLabels = {
+    'yoruba': 'Yoruba Cuisine',
+    'igbo': 'Igbo Cuisine',
+    'hausa': 'Hausa Cuisine',
+    'edo': 'Edo Cuisine',
+    'ibibio': 'Ibibio Cuisine',
+    'ijaw': 'Ijaw Cuisine',
+    'nupe': 'Nupe Cuisine',
+    'kanuri': 'Kanuri Cuisine',
+    'fulani': 'Fulani Cuisine',
+    'tiv': 'Tiv Cuisine',
+    'nigerian': 'Nigerian Cuisine'
+  };
+  return cuisineLabels[cuisine] || `${cuisine} cuisine`;
+};
+
+// Delightful Loading Animation Component
+const LoadingAnimation = ({ mealType, cuisine, isLoading, loadingProgress = 0, suggestionsReady = false, currentStage = 0 }) => {
+  const [isComplete, setIsComplete] = useState(false);
+  
+  const stages = [
+    {
+      title: "Gathering Cuisine Preferences",
+      description: `Exploring ${cuisine ? getCuisineDisplayName(cuisine) : 'Nigerian'} culinary traditions`,
+      icon: Globe,
+      color: "from-blue-400 to-purple-500",
+      progressThreshold: 0.25
+    },
+    {
+      title: "Gathering Dietary Preferences",
+      description: "Understanding your dietary needs and restrictions",
+      icon: Heart,
+      color: "from-green-400 to-teal-500",
+      progressThreshold: 0.5
+    },
+    {
+      title: "Analyzing All Preferences",
+      description: "Creating the perfect meal combination just for you",
+      icon: Sparkles,
+      color: "from-yellow-400 to-orange-500",
+      progressThreshold: 0.75
+    },
+    {
+      title: "Ready to Show Suggestions",
+      description: "Your personalized meal suggestions are ready!",
+      icon: ChefHat,
+      color: "from-pink-400 to-red-500",
+      progressThreshold: 1.0
+    }
+  ];
+
+  // Update completion state
+  useEffect(() => {
+    console.log('🔄 LoadingAnimation update:', { loadingProgress, isLoading, suggestionsReady, currentStage });
+    
+    // Complete animation when suggestions are ready
+    if (suggestionsReady) {
+      setIsComplete(true);
+      return;
+    }
+
+    // Reset completion when loading starts
+    if (isLoading && !suggestionsReady) {
+      setIsComplete(false);
+    }
+  }, [loadingProgress, isLoading, suggestionsReady, currentStage]);
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-yellow-50 to-red-50 flex items-center justify-center p-4">
+      <div className="max-w-md w-full">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-orange-400 to-red-500 rounded-full mb-4 animate-bounce">
+            <ChefHat className="w-8 h-8 text-white" />
+          </div>
+          <h1 className="text-2xl font-bold text-gray-800 mb-2">
+            Creating Your Perfect {mealType.charAt(0).toUpperCase() + mealType.slice(1)}
+          </h1>
+          <p className="text-gray-600">
+            Our AI chef is crafting personalized suggestions just for you
+          </p>
+        </div>
+
+        {/* Progress Stages */}
+        <div className="space-y-6">
+          {stages.map((stage, index) => {
+            const IconComponent = stage.icon;
+            const isActive = index === currentStage;
+            const isCompleted = index < currentStage;
+            
+            return (
+              <div
+                key={index}
+                className={`relative transition-all duration-1000 ease-out ${
+                  isActive ? 'scale-105' : 'scale-100'
+                }`}
+              >
+                {/* Stage Card */}
+                <div
+                  className={`relative overflow-hidden rounded-2xl p-6 border-2 transition-all duration-1000 ${
+                    isActive
+                      ? `bg-gradient-to-r ${stage.color} border-transparent shadow-xl`
+                      : isCompleted
+                      ? 'bg-green-50 border-green-200 shadow-lg'
+                      : 'bg-white border-gray-200 shadow-md'
+                  }`}
+                >
+                  {/* Background Pattern */}
+                  {isActive && (
+                    <div className="absolute inset-0 opacity-10">
+                      <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent"></div>
+                      <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -mr-10 -mt-10"></div>
+                      <div className="absolute bottom-0 left-0 w-16 h-16 bg-white/10 rounded-full -ml-8 -mb-8"></div>
+                    </div>
+                  )}
+
+                  {/* Content */}
+                  <div className="relative flex items-center space-x-4">
+                    {/* Icon */}
+                    <div
+                      className={`flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center transition-all duration-1000 ${
+                        isActive
+                          ? 'bg-white/20 text-white animate-pulse'
+                          : isCompleted
+                          ? 'bg-green-500 text-white'
+                          : 'bg-gray-100 text-gray-400'
+                      }`}
+                    >
+                      {isCompleted ? (
+                        <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center">
+                          <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                        </div>
+                      ) : (
+                        <IconComponent className="w-6 h-6" />
+                      )}
+                    </div>
+
+                    {/* Text Content */}
+                    <div className="flex-1 min-w-0">
+                      <h3
+                        className={`font-semibold text-lg transition-all duration-1000 ${
+                          isActive ? 'text-white' : isCompleted ? 'text-green-800' : 'text-gray-700'
+                        }`}
+                      >
+                        {stage.title}
+                      </h3>
+                      <p
+                        className={`text-sm transition-all duration-1000 ${
+                          isActive ? 'text-white/90' : isCompleted ? 'text-green-600' : 'text-gray-500'
+                        }`}
+                      >
+                        {stage.description}
+                      </p>
+                    </div>
+
+                    {/* Animated Elements */}
+                    {isActive && (
+                      <div className="flex-shrink-0">
+                        <div className="flex space-x-1">
+                          {[0, 1, 2].map((dot) => (
+                            <div
+                              key={dot}
+                              className="w-2 h-2 bg-white/60 rounded-full animate-bounce"
+                              style={{
+                                animationDelay: `${dot * 0.2}s`,
+                                animationDuration: '1s'
+                              }}
+                            ></div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Progress Bar */}
+                  {isActive && (
+                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/20">
+                      <div className="h-full bg-white/60 rounded-r-full animate-stage-progress"></div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Connection Line */}
+                {index < stages.length - 1 && (
+                  <div className="absolute left-6 top-full w-0.5 h-6 bg-gradient-to-b from-gray-200 to-transparent"></div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Fun Loading Message */}
+        <div className="text-center mt-8">
+          {!isComplete ? (
+            <div className="inline-flex items-center space-x-2 bg-white/80 backdrop-blur-sm rounded-full px-4 py-2 shadow-lg">
+              <div className="flex space-x-1">
+                {[0, 1, 2].map((dot) => (
+                  <div
+                    key={dot}
+                    className="w-2 h-2 bg-orange-500 rounded-full animate-bounce"
+                    style={{
+                      animationDelay: `${dot * 0.2}s`,
+                      animationDuration: '1s'
+                    }}
+                  ></div>
+                ))}
+              </div>
+              <span className="text-sm font-medium text-gray-700">
+                Almost there...
+              </span>
+            </div>
+          ) : (
+            <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full px-6 py-3 shadow-lg animate-stage-bounce">
+              <Sparkles className="w-5 h-5 text-white animate-pulse" />
+              <span className="text-sm font-bold text-white">
+                🎉 Ready to serve!
+              </span>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 // Loading Skeleton Components
 const SuggestionCardSkeleton = () => (
@@ -74,6 +301,115 @@ export default function Suggestions() {
   const [hasInitialized, setHasInitialized] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  const [suggestionsReady, setSuggestionsReady] = useState(false);
+  const [currentStage, setCurrentStage] = useState(0);
+  const isGeneratingRef = useRef(false);
+
+  // Debug loadingProgress changes
+  useEffect(() => {
+    console.log('🔄 loadingProgress changed to:', loadingProgress);
+  }, [loadingProgress]);
+
+  // Calculate current stage based on progress
+  useEffect(() => {
+    const stages = [0.25, 0.5, 0.75, 1.0];
+    let newStage = 0;
+    for (let i = stages.length - 1; i >= 0; i--) {
+      if (loadingProgress >= stages[i]) {
+        newStage = i;
+        break;
+      }
+    }
+    
+    if (newStage !== currentStage) {
+      console.log('🎯 Main component: Updating stage from', currentStage, 'to', newStage);
+      setCurrentStage(newStage);
+    }
+  }, [loadingProgress, currentStage]);
+
+  const generateSuggestions = useCallback(async (mealType, dietaryPreference, cuisine, ingredients, suggestionCount) => {
+    console.log('🔄 generateSuggestions called with:', { mealType, dietaryPreference, cuisine, ingredients, suggestionCount });
+    
+    // Prevent multiple simultaneous calls
+    if (isGeneratingRef.current) {
+      console.log('⚠️ generateSuggestions already in progress, skipping...');
+      return;
+    }
+    
+    isGeneratingRef.current = true;
+    setIsGenerating(true);
+    setLoading(true);
+    setSuggestions([]);
+    setAnimateCard(false);
+    setLoadingProgress(0);
+    setSuggestionsReady(false);
+
+    // Reset shown counts for this criteria when first loading
+    await resetShownCounts(mealType, dietaryPreference, cuisine, ingredients);
+    setLoadingProgress(0.25); // Stage 1: Gathering Cuisine Preferences
+
+    try {
+      const result = await getSmartMealSuggestions(
+        mealType,
+        dietaryPreference,
+        cuisine,
+        ingredients,
+        suggestionCount,
+        false // First load, not getting new suggestions
+      );
+      
+      // Handle case where request was skipped due to duplicate
+      if (result === null) {
+        console.log('⚠️ Request was skipped due to duplicate, retrying...');
+        setLoadingProgress(0.5); // Stage 2: Gathering Dietary Preferences
+        
+        // Prevent too many retries
+        if (retryCount >= 2) {
+          console.error('❌ Max retries reached, showing error');
+          alert('Failed to load suggestions after multiple attempts. Please refresh the page.');
+          return;
+        }
+        
+        setRetryCount(prev => prev + 1);
+        // Wait longer before retrying to avoid overwhelming the backend
+        await new Promise(resolve => setTimeout(resolve, 3000));
+        return generateSuggestions(mealType, dietaryPreference, cuisine, ingredients, suggestionCount);
+      }
+      
+      console.log('✅ generateSuggestions result:', { 
+        suggestionsCount: result.suggestions.length, 
+        totalShown: result.totalShown,
+        totalAvailable: result.totalAvailable 
+      });
+      
+      setLoadingProgress(0.75); // Stage 3: Analyzing All Preferences
+      setSuggestions(result.suggestions);
+      setHasMoreSuggestions(result.hasMore);
+      setSuggestionMetadata({
+        totalAvailable: result.totalAvailable,
+        requested: result.requested,
+        actual: result.actual,
+        remaining: result.remaining,
+        totalShown: result.totalShown
+      });
+      
+      setLoadingProgress(1.0); // Stage 4: Ready to Show Suggestions
+      setSuggestionsReady(true);
+      setTimeout(() => setAnimateCard(true), 100);
+    } catch (error) {
+      console.error('Error fetching suggestions:', error);
+      alert('Failed to fetch suggestions. Please try again.');
+    } finally {
+      // Add a small delay to ensure smooth transition
+      setTimeout(() => {
+        setLoading(false);
+      }, 500);
+      isGeneratingRef.current = false;
+      setIsGenerating(false);
+      setRetryCount(0); // Reset retry count on success
+    }
+  }, [isGenerating, retryCount]);
 
   useEffect(() => {
     if (!router.isReady) return;
@@ -106,85 +442,106 @@ export default function Suggestions() {
       }
       
       sessionStorage.setItem('lastCriteria', currentCriteria);
-      generateSuggestions(mealType, dietaryPreference, cuisine, ingredients, parseInt(suggestionCount));
+      
+      // Call generateSuggestions directly without dependency
+      const fetchSuggestions = async () => {
+        if (isGeneratingRef.current) {
+          console.log('⚠️ Already generating suggestions, skipping...');
+          return;
+        }
+        
+        isGeneratingRef.current = true;
+        setLoading(true);
+        setSuggestions([]);
+        setAnimateCard(false);
+        setLoadingProgress(0);
+        setSuggestionsReady(false);
+        setCurrentStage(0);
+
+        // Reset shown counts for this criteria when first loading
+        await resetShownCounts(mealType, dietaryPreference, cuisine, ingredients);
+        console.log('📊 Setting progress to 0.25 (Stage 1)');
+        setLoadingProgress(0.25); // Stage 1: Gathering Cuisine Preferences
+        console.log('📊 Progress state after 0.25:', loadingProgress);
+
+        try {
+          const result = await getSmartMealSuggestions(
+            mealType,
+            dietaryPreference,
+            cuisine,
+            ingredients,
+            parseInt(suggestionCount),
+            false // First load, not getting new suggestions
+          );
+          
+          // Handle case where request was skipped due to duplicate
+          if (result === null) {
+            console.log('⚠️ Request was skipped due to duplicate, retrying...');
+            console.log('📊 Setting progress to 0.5 (Stage 2)');
+            setLoadingProgress(0.5); // Stage 2: Gathering Dietary Preferences
+            
+            // Prevent too many retries
+            if (retryCount >= 2) {
+              console.error('❌ Max retries reached, showing error');
+              alert('Failed to load suggestions after multiple attempts. Please refresh the page.');
+              return;
+            }
+            
+            setRetryCount(prev => prev + 1);
+            // Wait longer before retrying to avoid overwhelming the backend
+            await new Promise(resolve => setTimeout(resolve, 3000));
+            return fetchSuggestions();
+          }
+          
+          console.log('✅ generateSuggestions result:', { 
+            suggestionsCount: result.suggestions.length, 
+            totalShown: result.totalShown,
+            totalAvailable: result.totalAvailable 
+          });
+          
+          console.log('📊 Setting progress to 0.75 (Stage 3)');
+          setLoadingProgress(0.75); // Stage 3: Analyzing All Preferences
+          console.log('📊 Progress state after 0.75:', loadingProgress);
+          setSuggestions(result.suggestions);
+          setHasMoreSuggestions(result.hasMore);
+          setSuggestionMetadata({
+            totalAvailable: result.totalAvailable,
+            requested: result.requested,
+            actual: result.actual,
+            remaining: result.remaining,
+            totalShown: result.totalShown
+          });
+          
+          // Add a small delay before final stage
+          setTimeout(() => {
+            console.log('📊 Setting progress to 1.0 (Stage 4)');
+            setLoadingProgress(1.0); // Stage 4: Ready to Show Suggestions
+            console.log('📊 Progress state after 1.0:', loadingProgress);
+            setSuggestionsReady(true);
+          }, 100);
+          setTimeout(() => setAnimateCard(true), 100);
+        } catch (error) {
+          console.error('Error fetching suggestions:', error);
+          alert('Failed to fetch suggestions. Please try again.');
+        } finally {
+          // Add a small delay to ensure smooth transition
+          setTimeout(() => {
+            setLoading(false);
+          }, 500);
+          isGeneratingRef.current = false;
+          setIsGenerating(false);
+          setRetryCount(0); // Reset retry count on success
+        }
+      };
+      
+      fetchSuggestions();
       
       // Start pre-generating AI suggestions in the background for faster loading
       setTimeout(() => {
         pregenerateAISuggestions(mealType, dietaryPreference, cuisine, ingredients);
       }, 500);
     }
-  }, [router.isReady, router.query, hasInitialized]);
-
-  const generateSuggestions = async (mealType, dietaryPreference, cuisine, ingredients, suggestionCount) => {
-    console.log('🔄 generateSuggestions called with:', { mealType, dietaryPreference, cuisine, ingredients, suggestionCount });
-    
-    // Prevent multiple simultaneous calls
-    if (isGenerating) {
-      console.log('⚠️ generateSuggestions already in progress, skipping...');
-      return;
-    }
-    
-    setIsGenerating(true);
-    setLoading(true);
-    setSuggestions([]);
-    setAnimateCard(false);
-
-    // Reset shown counts for this criteria when first loading
-    await resetShownCounts(mealType, dietaryPreference, cuisine, ingredients);
-
-    try {
-      const result = await getSmartMealSuggestions(
-        mealType,
-        dietaryPreference,
-        cuisine,
-        ingredients,
-        suggestionCount,
-        false // First load, not getting new suggestions
-      );
-      
-      // Handle case where request was skipped due to duplicate
-      if (result === null) {
-        console.log('⚠️ Request was skipped due to duplicate, retrying...');
-        
-        // Prevent infinite retries
-        if (retryCount >= 3) {
-          console.error('❌ Max retries reached, showing error');
-          alert('Failed to load suggestions after multiple attempts. Please refresh the page.');
-          return;
-        }
-        
-        setRetryCount(prev => prev + 1);
-        // Wait a bit and retry
-        await new Promise(resolve => setTimeout(resolve, 200));
-        return generateSuggestions(mealType, dietaryPreference, cuisine, ingredients, suggestionCount);
-      }
-      
-      console.log('✅ generateSuggestions result:', { 
-        suggestionsCount: result.suggestions.length, 
-        totalShown: result.totalShown,
-        totalAvailable: result.totalAvailable 
-      });
-      
-      setSuggestions(result.suggestions);
-      setHasMoreSuggestions(result.hasMore);
-      setSuggestionMetadata({
-        totalAvailable: result.totalAvailable,
-        requested: result.requested,
-        actual: result.actual,
-        remaining: result.remaining,
-        totalShown: result.totalShown
-      });
-      
-      setTimeout(() => setAnimateCard(true), 100);
-    } catch (error) {
-      console.error('Error fetching suggestions:', error);
-      alert('Failed to fetch suggestions. Please try again.');
-    } finally {
-      setLoading(false);
-      setIsGenerating(false);
-      setRetryCount(0); // Reset retry count on success
-    }
-  };
+  }, [router.isReady, router.query, hasInitialized, retryCount]);
 
   const handleViewRecipe = (recipe) => {
     // Open recipe modal instead of navigating to a separate page
@@ -314,7 +671,17 @@ export default function Suggestions() {
         </div>
 
         {/* Loading State */}
-        {loading && <SuggestionsSkeleton />}
+        {loading && (
+          <LoadingAnimation 
+            key={`loading-${loadingProgress}-${suggestionsReady}`}
+            mealType={router.query.mealType || 'breakfast'} 
+            cuisine={router.query.cuisine || ''} 
+            isLoading={loading}
+            loadingProgress={loadingProgress}
+            suggestionsReady={suggestionsReady}
+            currentStage={currentStage}
+          />
+        )}
 
         {/* Suggestions Display */}
         {suggestions.length > 0 && !loading && (

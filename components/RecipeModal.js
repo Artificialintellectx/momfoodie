@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { X, Clock, Users, DollarSign, Utensils, List, Info, ChefHat, Star } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
@@ -44,45 +44,7 @@ export default function RecipeModal({ recipeId, isOpen, onClose }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    if (isOpen && recipeId) {
-      fetchRecipe(recipeId);
-    }
-  }, [isOpen, recipeId]);
-
-  const fetchRecipe = async (recipeId) => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const { data, error } = await supabase
-        .from('meal_suggestions')
-        .select('*')
-        .eq('id', recipeId)
-        .single();
-
-      if (error) {
-        throw error;
-      }
-
-      if (!data) {
-        setError('Recipe not found');
-        return;
-      }
-
-      // Transform the recipe data to match the expected format
-      const transformedRecipe = transformRecipe(data);
-      setRecipe(transformedRecipe);
-
-    } catch (error) {
-      console.error('Error fetching recipe:', error);
-      setError('Failed to load recipe');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const transformRecipe = (recipe) => {
+  const transformRecipe = useCallback((recipe) => {
     // Generate smart tags based on recipe characteristics
     const tags = generateSmartTags(recipe);
     
@@ -113,7 +75,45 @@ export default function RecipeModal({ recipeId, isOpen, onClose }) {
       meal_type: recipe.meal_type,
       dietary_preference: recipe.dietary_preference
     };
-  };
+  }, []);
+
+  const fetchRecipe = useCallback(async (recipeId) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const { data, error } = await supabase
+        .from('meal_suggestions')
+        .select('*')
+        .eq('id', recipeId)
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      if (!data) {
+        setError('Recipe not found');
+        return;
+      }
+
+      // Transform the recipe data to match the expected format
+      const transformedRecipe = transformRecipe(data);
+      setRecipe(transformedRecipe);
+
+    } catch (error) {
+      console.error('Error fetching recipe:', error);
+      setError('Failed to load recipe');
+    } finally {
+      setLoading(false);
+    }
+  }, [transformRecipe]);
+
+  useEffect(() => {
+    if (isOpen && recipeId) {
+      fetchRecipe(recipeId);
+    }
+  }, [isOpen, recipeId, fetchRecipe]);
 
   const generateSmartTags = (recipe) => {
     const tags = ['Nigerian', 'Authentic'];
