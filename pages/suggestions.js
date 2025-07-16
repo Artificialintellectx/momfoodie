@@ -421,7 +421,7 @@ export default function Suggestions() {
       setIsGenerating(false);
       setRetryCount(0); // Reset retry count on success
     }
-  }, [isGenerating, retryCount]);
+  }, [retryCount]);
 
   useEffect(() => {
     if (!router.isReady) return;
@@ -572,7 +572,7 @@ export default function Suggestions() {
         pregenerateAISuggestions(mealType, dietaryPreference, cuisine, ingredients);
       }, 500);
     }
-  }, [router.isReady, router.query, hasInitialized, retryCount]);
+  }, [router.isReady, router.query, hasInitialized, retryCount, loadingProgress]);
 
   const handleViewRecipe = (recipe) => {
     // Open recipe modal instead of navigating to a separate page
