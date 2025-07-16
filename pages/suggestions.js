@@ -4,6 +4,7 @@ import { ArrowLeft, Sparkles, Star, Clock, Users, DollarSign, Utensils } from 'l
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import { getSmartMealSuggestions, resetShownCounts } from '../lib/database-service';
+import { pregenerateAISuggestions } from '../lib/database-service';
 import RecipeModal from '../components/RecipeModal';
 
 // Loading Skeleton Components
@@ -70,8 +71,13 @@ export default function Suggestions() {
   });
   const [selectedRecipeId, setSelectedRecipeId] = useState(null);
   const [isRecipeModalOpen, setIsRecipeModalOpen] = useState(false);
+  const [hasInitialized, setHasInitialized] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
+    if (!router.isReady) return;
+
     // Get form data from URL query parameters
     const {
       mealType = 'breakfast',
@@ -81,18 +87,50 @@ export default function Suggestions() {
       suggestionCount = 1
     } = router.query;
 
-    if (router.isReady) {
+    const currentCriteria = `${mealType}-${dietaryPreference}-${cuisine}-${ingredients}`;
+    const lastCriteria = sessionStorage.getItem('lastCriteria');
+
+    // Only generate suggestions if:
+    // 1. This is the first time (not initialized) OR
+    // 2. The criteria has actually changed
+    if (!hasInitialized || currentCriteria !== lastCriteria) {
+      console.log('🔄 useEffect triggered:', { 
+        hasInitialized, 
+        currentCriteria, 
+        lastCriteria, 
+        isInitialLoad: !hasInitialized 
+      });
+      
+      if (!hasInitialized) {
+        setHasInitialized(true);
+      }
+      
+      sessionStorage.setItem('lastCriteria', currentCriteria);
       generateSuggestions(mealType, dietaryPreference, cuisine, ingredients, parseInt(suggestionCount));
+      
+      // Start pre-generating AI suggestions in the background for faster loading
+      setTimeout(() => {
+        pregenerateAISuggestions(mealType, dietaryPreference, cuisine, ingredients);
+      }, 500);
     }
-  }, [router.isReady, router.query]);
+  }, [router.isReady, router.query, hasInitialized]);
 
   const generateSuggestions = async (mealType, dietaryPreference, cuisine, ingredients, suggestionCount) => {
+    console.log('🔄 generateSuggestions called with:', { mealType, dietaryPreference, cuisine, ingredients, suggestionCount });
+    
+    // Prevent multiple simultaneous calls
+    if (isGenerating) {
+      console.log('⚠️ generateSuggestions already in progress, skipping...');
+      return;
+    }
+    
+    setIsGenerating(true);
     setLoading(true);
     setSuggestions([]);
     setAnimateCard(false);
 
     // Reset shown counts for this criteria when first loading
-    resetShownCounts(mealType, dietaryPreference, cuisine, ingredients);
+    await resetShownCounts(mealType, dietaryPreference, cuisine, ingredients);
 
     try {
       const result = await getSmartMealSuggestions(
@@ -103,6 +141,29 @@ export default function Suggestions() {
         suggestionCount,
         false // First load, not getting new suggestions
       );
+      
+      // Handle case where request was skipped due to duplicate
+      if (result === null) {
+        console.log('⚠️ Request was skipped due to duplicate, retrying...');
+        
+        // Prevent infinite retries
+        if (retryCount >= 3) {
+          console.error('❌ Max retries reached, showing error');
+          alert('Failed to load suggestions after multiple attempts. Please refresh the page.');
+          return;
+        }
+        
+        setRetryCount(prev => prev + 1);
+        // Wait a bit and retry
+        await new Promise(resolve => setTimeout(resolve, 200));
+        return generateSuggestions(mealType, dietaryPreference, cuisine, ingredients, suggestionCount);
+      }
+      
+      console.log('✅ generateSuggestions result:', { 
+        suggestionsCount: result.suggestions.length, 
+        totalShown: result.totalShown,
+        totalAvailable: result.totalAvailable 
+      });
       
       setSuggestions(result.suggestions);
       setHasMoreSuggestions(result.hasMore);
@@ -120,6 +181,8 @@ export default function Suggestions() {
       alert('Failed to fetch suggestions. Please try again.');
     } finally {
       setLoading(false);
+      setIsGenerating(false);
+      setRetryCount(0); // Reset retry count on success
     }
   };
 
@@ -205,6 +268,23 @@ export default function Suggestions() {
     return labels[mealType] || 'Meal';
   };
 
+  const getCuisineDisplayName = (cuisine) => {
+    const cuisineLabels = {
+      'yoruba': 'Yoruba Cuisine',
+      'igbo': 'Igbo Cuisine',
+      'hausa': 'Hausa Cuisine',
+      'edo': 'Edo Cuisine',
+      'ibibio': 'Ibibio Cuisine',
+      'ijaw': 'Ijaw Cuisine',
+      'nupe': 'Nupe Cuisine',
+      'kanuri': 'Kanuri Cuisine',
+      'fulani': 'Fulani Cuisine',
+      'tiv': 'Tiv Cuisine',
+      'nigerian': 'Nigerian Cuisine'
+    };
+    return cuisineLabels[cuisine] || `${cuisine} cuisine`;
+  };
+
   return (
     <div className="min-h-screen bg-[#f8fafc] font-sans">
       <div className="container mx-auto px-4 py-6 max-w-2xl">
@@ -222,7 +302,7 @@ export default function Suggestions() {
             </h1>
             <p className="text-gray-600 text-sm">
               {router.query.dietaryPreference !== 'any' && `${router.query.dietaryPreference} • `}
-              {router.query.cuisine && `${router.query.cuisine} cuisine`}
+              {router.query.cuisine && `${getCuisineDisplayName(router.query.cuisine)}`}
               {router.query.ingredients && router.query.ingredients.trim() !== '' && (
                 <span className="inline-flex items-center gap-1 ml-2">
                   <span className="w-2 h-2 bg-green-500 rounded-full"></span>
@@ -446,7 +526,7 @@ export default function Suggestions() {
                     <h3 className="text-lg font-semibold text-blue-900">AI-Enhanced Suggestions</h3>
                   </div>
                   <p className="text-blue-700 text-sm">
-                    You've explored all our database suggestions! Here are 12 fresh AI-generated meal ideas tailored to your preferences. Click "Get More AI Suggestions" to see them one by one.
+                    You've explored all our database suggestions! Here are fresh AI-generated meal ideas tailored to your preferences. Click "Get More AI Suggestions" to see more.
                   </p>
                 </div>
               </div>

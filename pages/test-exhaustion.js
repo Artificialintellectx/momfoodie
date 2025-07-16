@@ -16,18 +16,18 @@ export default function TestExhaustion() {
       
       // Test scenario: Get all 3 database suggestions first
       for (let i = 1; i <= 3; i++) {
-        const result = await getSmartMealSuggestions('breakfast', 'any', 'nigerian', '', 1, false);
+        const result = await getSmartMealSuggestions('breakfast', 'any', 'yoruba', '', 1, false);
         newResults.push(`🔍 Suggestion ${i}: ${result.suggestions[0]?.name} | totalShown: ${result.totalShown}/3 | hasMore: ${result.hasMore} | isAI: ${result.suggestions[0]?.is_ai_generated || false}`);
       }
       
       // Now try to get more - this should trigger AI
       newResults.push('--- Trying to get more suggestions (should trigger AI) ---');
       
-      const aiResult = await getSmartMealSuggestions('breakfast', 'any', 'nigerian', '', 1, true);
+      const aiResult = await getSmartMealSuggestions('breakfast', 'any', 'yoruba', '', 1, true);
       newResults.push(`🤖 AI Suggestion: ${aiResult.suggestions[0]?.name} | totalShown: ${aiResult.totalShown} | hasMore: ${aiResult.hasMore} | isAI: ${aiResult.suggestions[0]?.is_ai_generated || false}`);
       
       // Try another AI suggestion
-      const aiResult2 = await getSmartMealSuggestions('breakfast', 'any', 'nigerian', '', 1, true);
+      const aiResult2 = await getSmartMealSuggestions('breakfast', 'any', 'yoruba', '', 1, true);
       newResults.push(`🤖 AI Suggestion 2: ${aiResult2.suggestions[0]?.name} | totalShown: ${aiResult2.totalShown} | hasMore: ${aiResult2.hasMore} | isAI: ${aiResult2.suggestions[0]?.is_ai_generated || false}`);
       
     } catch (error) {

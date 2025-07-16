@@ -121,7 +121,7 @@ export default function Home() {
   const router = useRouter();
   const [mealType, setMealType] = useState('breakfast');
   const [dietaryPreference, setDietaryPreference] = useState('any');
-  const [cuisine, setCuisine] = useState('nigerian');
+  const [cuisine, setCuisine] = useState('');
   const [ingredients, setIngredients] = useState('');
 
   const [showFeedback, setShowFeedback] = useState(false);
@@ -236,16 +236,17 @@ export default function Home() {
   ];
 
   const cuisineOptions = [
-    { value: '', label: 'Any Cuisine', icon: '🌍' },
-    { value: 'nigerian', label: 'Nigerian', icon: '🇳🇬', popular: true },
-    { value: 'italian', label: 'Italian', icon: '🇮🇹' },
-    { value: 'chinese', label: 'Chinese', icon: '🇨🇳' },
-    { value: 'mexican', label: 'Mexican', icon: '🇲🇽' },
-    { value: 'indian', label: 'Indian', icon: '🇮🇳' },
-    { value: 'mediterranean', label: 'Mediterranean', icon: '🌊' },
-    { value: 'japanese', label: 'Japanese', icon: '🇯🇵' },
-    { value: 'thai', label: 'Thai', icon: '🇹🇭' },
-    { value: 'french', label: 'French', icon: '🇫🇷' }
+    { value: '', label: 'Any Nigerian Cuisine', icon: '🇳🇬' },
+    { value: 'yoruba', label: 'Yoruba Cuisine', icon: '🫘', popular: true },
+    { value: 'igbo', label: 'Igbo Cuisine', icon: '🥜' },
+    { value: 'hausa', label: 'Hausa Cuisine', icon: '🌾' },
+    { value: 'edo', label: 'Edo Cuisine', icon: '🍠' },
+    { value: 'ibibio', label: 'Ibibio Cuisine', icon: '🐟' },
+    { value: 'ijaw', label: 'Ijaw Cuisine', icon: '🦐' },
+    { value: 'nupe', label: 'Nupe Cuisine', icon: '🌽' },
+    { value: 'kanuri', label: 'Kanuri Cuisine', icon: '🥩' },
+    { value: 'fulani', label: 'Fulani Cuisine', icon: '🥛' },
+    { value: 'tiv', label: 'Tiv Cuisine', icon: '🌿' }
   ];
 
   const handleDietaryPreferenceChange = (value) => {
