@@ -76,6 +76,11 @@ const LoadingAnimation = ({ mealType, cuisine, isLoading, loadingProgress = 0, s
     }
   }, [loadingProgress, isLoading, suggestionsReady, currentStage]);
 
+  // Force re-render when currentStage changes
+  useEffect(() => {
+    console.log('🎯 LoadingAnimation: Stage changed to', currentStage);
+  }, [currentStage]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-yellow-50 to-red-50 flex items-center justify-center p-4">
       <div className="max-w-md w-full">
@@ -99,18 +104,23 @@ const LoadingAnimation = ({ mealType, cuisine, isLoading, loadingProgress = 0, s
             const isActive = index === currentStage;
             const isCompleted = index < currentStage;
             
+            // Debug logging for stage states
+            if (isActive || isCompleted) {
+              console.log(`🎯 Stage ${index} (${stage.title}):`, { isActive, isCompleted, currentStage });
+            }
+            
             return (
               <div
                 key={index}
                 className={`relative transition-all duration-1000 ease-out ${
-                  isActive ? 'scale-105' : 'scale-100'
+                  isActive ? 'scale-105 animate-stage-bounce' : 'scale-100'
                 }`}
               >
                 {/* Stage Card */}
                 <div
                   className={`relative overflow-hidden rounded-2xl p-6 border-2 transition-all duration-1000 ${
                     isActive
-                      ? `bg-gradient-to-r ${stage.color} border-transparent shadow-xl`
+                      ? `bg-gradient-to-r ${stage.color} border-transparent shadow-xl animate-stage-glow`
                       : isCompleted
                       ? 'bg-green-50 border-green-200 shadow-lg'
                       : 'bg-white border-gray-200 shadow-md'
@@ -133,13 +143,13 @@ const LoadingAnimation = ({ mealType, cuisine, isLoading, loadingProgress = 0, s
                         isActive
                           ? 'bg-white/20 text-white animate-pulse'
                           : isCompleted
-                          ? 'bg-green-500 text-white'
+                          ? 'bg-green-500 text-white animate-bounce-in'
                           : 'bg-gray-100 text-gray-400'
                       }`}
                     >
                       {isCompleted ? (
                         <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center">
-                          <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                          <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
                         </div>
                       ) : (
                         <IconComponent className="w-6 h-6" />
@@ -315,12 +325,17 @@ export default function Suggestions() {
   useEffect(() => {
     const stages = [0.25, 0.5, 0.75, 1.0];
     let newStage = 0;
-    for (let i = stages.length - 1; i >= 0; i--) {
+    
+    // Find the current stage based on progress
+    for (let i = 0; i < stages.length; i++) {
       if (loadingProgress >= stages[i]) {
         newStage = i;
+      } else {
         break;
       }
     }
+    
+    console.log('🎯 Stage calculation:', { loadingProgress, newStage, currentStage, stages });
     
     if (newStage !== currentStage) {
       console.log('🎯 Main component: Updating stage from', currentStage, 'to', newStage);
@@ -460,11 +475,22 @@ export default function Suggestions() {
 
         // Reset shown counts for this criteria when first loading
         await resetShownCounts(mealType, dietaryPreference, cuisine, ingredients);
+        
+        // Add delay to ensure smooth stage transitions
+        await new Promise(resolve => setTimeout(resolve, 1000));
         console.log('📊 Setting progress to 0.25 (Stage 1)');
         setLoadingProgress(0.25); // Stage 1: Gathering Cuisine Preferences
         console.log('📊 Progress state after 0.25:', loadingProgress);
+        
+        // Add delay before starting the AI request to show stage 1
+        await new Promise(resolve => setTimeout(resolve, 1000));
 
         try {
+          // Add delay to show stage 2 (Gathering Dietary Preferences)
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          console.log('📊 Setting progress to 0.5 (Stage 2)');
+          setLoadingProgress(0.5); // Stage 2: Gathering Dietary Preferences
+          
           const result = await getSmartMealSuggestions(
             mealType,
             dietaryPreference,
@@ -477,6 +503,9 @@ export default function Suggestions() {
           // Handle case where request was skipped due to duplicate
           if (result === null) {
             console.log('⚠️ Request was skipped due to duplicate, retrying...');
+            
+            // Add delay before stage 2
+            await new Promise(resolve => setTimeout(resolve, 1000));
             console.log('📊 Setting progress to 0.5 (Stage 2)');
             setLoadingProgress(0.5); // Stage 2: Gathering Dietary Preferences
             
@@ -499,6 +528,8 @@ export default function Suggestions() {
             totalAvailable: result.totalAvailable 
           });
           
+          // Add delay before stage 3
+          await new Promise(resolve => setTimeout(resolve, 1000));
           console.log('📊 Setting progress to 0.75 (Stage 3)');
           setLoadingProgress(0.75); // Stage 3: Analyzing All Preferences
           console.log('📊 Progress state after 0.75:', loadingProgress);
@@ -518,7 +549,10 @@ export default function Suggestions() {
             setLoadingProgress(1.0); // Stage 4: Ready to Show Suggestions
             console.log('📊 Progress state after 1.0:', loadingProgress);
             setSuggestionsReady(true);
-          }, 100);
+          }, 1000);
+          
+          // Ensure minimum loading time for smooth animation
+          await new Promise(resolve => setTimeout(resolve, 500));
           setTimeout(() => setAnimateCard(true), 100);
         } catch (error) {
           console.error('Error fetching suggestions:', error);
@@ -673,7 +707,7 @@ export default function Suggestions() {
         {/* Loading State */}
         {loading && (
           <LoadingAnimation 
-            key={`loading-${loadingProgress}-${suggestionsReady}`}
+            key="loading-animation"
             mealType={router.query.mealType || 'breakfast'} 
             cuisine={router.query.cuisine || ''} 
             isLoading={loading}
