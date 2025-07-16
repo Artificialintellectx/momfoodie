@@ -82,23 +82,24 @@ const LoadingAnimation = ({ mealType, cuisine, isLoading, loadingProgress = 0, s
   }, [currentStage]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-yellow-50 to-red-50 flex items-center justify-center p-4">
-      <div className="max-w-md w-full">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-orange-400 to-red-500 rounded-full mb-4 animate-bounce">
-            <ChefHat className="w-8 h-8 text-white" />
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-yellow-50 to-red-50 flex items-center justify-center p-1 sm:p-2 md:p-4">
+      {/* Mobile-optimized layout */}
+      <div className="w-full max-w-sm sm:max-w-md">
+        {/* Compact Header for Mobile */}
+        <div className="text-center mb-2 sm:mb-3 md:mb-6">
+          <div className="inline-flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-gradient-to-r from-orange-400 to-red-500 rounded-full mb-1.5 sm:mb-2 md:mb-3 animate-bounce">
+            <ChefHat className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-800 mb-2">
+          <h1 className="text-sm sm:text-base md:text-lg font-bold text-gray-800 mb-0.5 sm:mb-1 md:mb-2">
             Creating Your Perfect {mealType.charAt(0).toUpperCase() + mealType.slice(1)}
           </h1>
-          <p className="text-gray-600">
+          <p className="text-xs text-gray-600">
             Our AI chef is crafting personalized suggestions just for you
           </p>
         </div>
 
-        {/* Progress Stages */}
-        <div className="space-y-6">
+        {/* Mobile-optimized Progress Stages */}
+        <div className="space-y-1.5 sm:space-y-2 md:space-y-4">
           {stages.map((stage, index) => {
             const IconComponent = stage.icon;
             const isActive = index === currentStage;
@@ -116,9 +117,9 @@ const LoadingAnimation = ({ mealType, cuisine, isLoading, loadingProgress = 0, s
                   isActive ? 'scale-105 animate-stage-bounce' : 'scale-100'
                 }`}
               >
-                {/* Stage Card */}
+                {/* Compact Stage Card */}
                 <div
-                  className={`relative overflow-hidden rounded-2xl p-6 border-2 transition-all duration-1000 ${
+                  className={`relative overflow-hidden rounded-lg sm:rounded-xl md:rounded-2xl p-2 sm:p-2.5 md:p-4 border-2 transition-all duration-1000 ${
                     isActive
                       ? `bg-gradient-to-r ${stage.color} border-transparent shadow-xl animate-stage-glow`
                       : isCompleted
@@ -130,16 +131,16 @@ const LoadingAnimation = ({ mealType, cuisine, isLoading, loadingProgress = 0, s
                   {isActive && (
                     <div className="absolute inset-0 opacity-10">
                       <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent"></div>
-                      <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -mr-10 -mt-10"></div>
-                      <div className="absolute bottom-0 left-0 w-16 h-16 bg-white/10 rounded-full -ml-8 -mb-8"></div>
+                      <div className="absolute top-0 right-0 w-12 h-12 sm:w-16 sm:h-16 bg-white/10 rounded-full -mr-6 -mt-6 sm:-mr-8 sm:-mt-8"></div>
+                      <div className="absolute bottom-0 left-0 w-8 h-8 sm:w-12 sm:h-12 bg-white/10 rounded-full -ml-4 -mb-4 sm:-ml-6 sm:-mb-6"></div>
                     </div>
                   )}
 
-                  {/* Content */}
-                  <div className="relative flex items-center space-x-4">
+                  {/* Compact Content */}
+                  <div className="relative flex items-center space-x-2 sm:space-x-2.5 md:space-x-3">
                     {/* Icon */}
                     <div
-                      className={`flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center transition-all duration-1000 ${
+                      className={`flex-shrink-0 w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center transition-all duration-1000 ${
                         isActive
                           ? 'bg-white/20 text-white animate-pulse'
                           : isCompleted
@@ -148,25 +149,25 @@ const LoadingAnimation = ({ mealType, cuisine, isLoading, loadingProgress = 0, s
                       }`}
                     >
                       {isCompleted ? (
-                        <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center">
-                          <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                        <div className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4 bg-white rounded-full flex items-center justify-center">
+                          <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-500 rounded-full animate-pulse"></div>
                         </div>
                       ) : (
-                        <IconComponent className="w-6 h-6" />
+                        <IconComponent className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4" />
                       )}
                     </div>
 
-                    {/* Text Content */}
+                    {/* Compact Text Content */}
                     <div className="flex-1 min-w-0">
                       <h3
-                        className={`font-semibold text-lg transition-all duration-1000 ${
+                        className={`font-semibold text-xs sm:text-sm md:text-base transition-all duration-1000 ${
                           isActive ? 'text-white' : isCompleted ? 'text-green-800' : 'text-gray-700'
                         }`}
                       >
                         {stage.title}
                       </h3>
                       <p
-                        className={`text-sm transition-all duration-1000 ${
+                        className={`text-xs transition-all duration-1000 ${
                           isActive ? 'text-white/90' : isCompleted ? 'text-green-600' : 'text-gray-500'
                         }`}
                       >
@@ -177,11 +178,11 @@ const LoadingAnimation = ({ mealType, cuisine, isLoading, loadingProgress = 0, s
                     {/* Animated Elements */}
                     {isActive && (
                       <div className="flex-shrink-0">
-                        <div className="flex space-x-1">
+                        <div className="flex space-x-0.5 sm:space-x-1">
                           {[0, 1, 2].map((dot) => (
                             <div
                               key={dot}
-                              className="w-2 h-2 bg-white/60 rounded-full animate-bounce"
+                              className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-white/60 rounded-full animate-bounce"
                               style={{
                                 animationDelay: `${dot * 0.2}s`,
                                 animationDuration: '1s'
@@ -195,7 +196,7 @@ const LoadingAnimation = ({ mealType, cuisine, isLoading, loadingProgress = 0, s
 
                   {/* Progress Bar */}
                   {isActive && (
-                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/20">
+                    <div className="absolute bottom-0 left-0 right-0 h-0.5 sm:h-1 bg-white/20">
                       <div className="h-full bg-white/60 rounded-r-full animate-stage-progress"></div>
                     </div>
                   )}
@@ -203,22 +204,22 @@ const LoadingAnimation = ({ mealType, cuisine, isLoading, loadingProgress = 0, s
 
                 {/* Connection Line */}
                 {index < stages.length - 1 && (
-                  <div className="absolute left-6 top-full w-0.5 h-6 bg-gradient-to-b from-gray-200 to-transparent"></div>
+                  <div className="absolute left-3 sm:left-3.5 md:left-4 top-full w-0.5 h-2 sm:h-3 md:h-4 bg-gradient-to-b from-gray-200 to-transparent"></div>
                 )}
               </div>
             );
           })}
         </div>
 
-        {/* Fun Loading Message */}
-        <div className="text-center mt-8">
+        {/* Compact Loading Message */}
+        <div className="text-center mt-2 sm:mt-3 md:mt-6">
           {!isComplete ? (
-            <div className="inline-flex items-center space-x-2 bg-white/80 backdrop-blur-sm rounded-full px-4 py-2 shadow-lg">
-              <div className="flex space-x-1">
+            <div className="inline-flex items-center space-x-1.5 sm:space-x-2 bg-white/80 backdrop-blur-sm rounded-full px-2 py-1 sm:px-3 sm:py-1.5 shadow-lg">
+              <div className="flex space-x-0.5 sm:space-x-1">
                 {[0, 1, 2].map((dot) => (
                   <div
                     key={dot}
-                    className="w-2 h-2 bg-orange-500 rounded-full animate-bounce"
+                    className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-orange-500 rounded-full animate-bounce"
                     style={{
                       animationDelay: `${dot * 0.2}s`,
                       animationDuration: '1s'
@@ -226,16 +227,12 @@ const LoadingAnimation = ({ mealType, cuisine, isLoading, loadingProgress = 0, s
                   ></div>
                 ))}
               </div>
-              <span className="text-sm font-medium text-gray-700">
-                Almost there...
-              </span>
+              <span className="text-xs sm:text-sm text-gray-700 font-medium">Almost there...</span>
             </div>
           ) : (
-            <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full px-6 py-3 shadow-lg animate-stage-bounce">
-              <Sparkles className="w-5 h-5 text-white animate-pulse" />
-              <span className="text-sm font-bold text-white">
-                🎉 Ready to serve!
-              </span>
+            <div className="inline-flex items-center space-x-2 bg-green-50 border border-green-200 rounded-full px-3 py-1.5 shadow-lg">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              <span className="text-xs sm:text-sm text-green-700 font-medium">Ready!</span>
             </div>
           )}
         </div>
@@ -678,26 +675,28 @@ export default function Suggestions() {
 
   return (
     <div className="min-h-screen bg-[#f8fafc] font-sans">
-      <div className="container mx-auto px-4 py-6 max-w-2xl">
-        {/* Header with Back Button */}
-        <div className="flex items-center gap-4 mb-6">
+      <div className="container mx-auto px-4 py-2 sm:py-4 max-w-2xl">
+        {/* Header with Back Button - More compact */}
+        <div className="flex items-center gap-3 mb-4 sm:mb-6">
           <button
             onClick={handleBack}
-            className="p-3 bg-white rounded-xl shadow-lg border border-gray-200 transform hover:scale-105 active:scale-95 transition-all duration-200"
+            className="p-2.5 sm:p-3 bg-white rounded-xl shadow-lg border border-gray-200 transform hover:scale-105 active:scale-95 transition-all duration-200"
           >
-            <ArrowLeft className="w-6 h-6 text-gray-700" />
+            <ArrowLeft className="w-5 h-5 sm:w-6 sm:h-6 text-gray-700" />
           </button>
-          <div className="flex-1">
-            <h1 className="text-2xl font-bold text-gray-900">
+          <div className="flex-1 min-w-0">
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 truncate">
               {getMealTypeIcon(router.query.mealType)} {getMealTypeLabel(router.query.mealType)} Suggestions
             </h1>
-            <p className="text-gray-600 text-sm">
+            <p className="text-gray-600 text-xs sm:text-sm truncate">
               {router.query.dietaryPreference !== 'any' && `${router.query.dietaryPreference} • `}
               {router.query.cuisine && `${getCuisineDisplayName(router.query.cuisine)}`}
               {router.query.ingredients && router.query.ingredients.trim() !== '' && (
                 <span className="inline-flex items-center gap-1 ml-2">
-                  <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                  Matching ingredients: {router.query.ingredients}
+                  <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-500 rounded-full"></span>
+                  <span className="hidden sm:inline">Matching ingredients:</span>
+                  <span className="sm:hidden">Ingredients:</span>
+                  {router.query.ingredients}
                 </span>
               )}
             </p>
@@ -719,23 +718,24 @@ export default function Suggestions() {
 
         {/* Suggestions Display */}
         {suggestions.length > 0 && !loading && (
-          <div className={`bg-white rounded-2xl shadow-lg p-6 border border-gray-100 transition-all duration-500 ${
+          <div className={`bg-white rounded-2xl shadow-lg p-4 sm:p-6 border border-gray-100 transition-all duration-500 ${
             animateCard ? 'animate-fade-in' : ''
           }`}>
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between mb-4 sm:mb-6">
               <div className="flex items-center gap-2">
-                <div className="p-2 bg-orange-100 rounded-full">
-                  <Sparkles className="w-5 h-5 text-orange-500" />
+                <div className="p-1.5 sm:p-2 bg-orange-100 rounded-full">
+                  <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500" />
                 </div>
-                <h2 className="text-2xl font-bold text-gray-900">
+                <h2 className="text-lg sm:text-2xl font-bold text-gray-900">
                   Your Meal Suggestions
                 </h2>
               </div>
               {suggestionMetadata.totalAvailable > 0 && (
-                <div className="text-sm text-gray-600 bg-gray-50 px-3 py-1 rounded-full">
-                  {suggestionMetadata.totalShown} of {suggestionMetadata.totalAvailable} available
+                <div className="text-xs sm:text-sm text-gray-600 bg-gray-50 px-2 sm:px-3 py-1 rounded-full">
+                  <span className="hidden sm:inline">{suggestionMetadata.totalShown} of {suggestionMetadata.totalAvailable} available</span>
+                  <span className="sm:hidden">{suggestionMetadata.totalShown}/{suggestionMetadata.totalAvailable}</span>
                   {suggestions.some(s => s.is_ai_generated) && (
-                    <span className="ml-2 text-blue-600 font-medium">• AI Enhanced</span>
+                    <span className="ml-1 sm:ml-2 text-blue-600 font-medium">• AI</span>
                   )}
                 </div>
               )}
@@ -744,36 +744,36 @@ export default function Suggestions() {
             {/* Mobile Carousel */}
             <div className="md:hidden">
               <Swiper
-                spaceBetween={20}
-                slidesPerView={1.2}
+                spaceBetween={16}
+                slidesPerView={1.1}
                 centeredSlides={true}
                 loop={false}
                 className="suggestion-swiper"
               >
                 {suggestions.map((suggestion, index) => (
                   <SwiperSlide key={index}>
-                    <div className="bg-gradient-to-br from-orange-50 to-pink-50 rounded-2xl p-6 border border-orange-100 transform hover:scale-105 transition-all duration-300">
-                      <div className="flex items-start justify-between mb-4">
-                        <h3 className="text-xl font-bold text-gray-900 flex-1">
+                    <div className="bg-gradient-to-br from-orange-50 to-pink-50 rounded-2xl p-4 sm:p-6 border border-orange-100 transform hover:scale-105 transition-all duration-300">
+                      <div className="flex items-start justify-between mb-3 sm:mb-4">
+                        <h3 className="text-lg sm:text-xl font-bold text-gray-900 flex-1">
                           {suggestion.name}
                         </h3>
                         <div className="flex items-center gap-1 text-orange-500">
-                          <Star className="w-4 h-4 fill-current" />
-                          <span className="text-sm font-medium">
+                          <Star className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-current" />
+                          <span className="text-xs sm:text-sm font-medium">
                             {suggestion.is_ai_generated ? 'AI' : 'DB'}
                           </span>
                         </div>
                       </div>
                       
-                      <p className="text-gray-600 mb-4 leading-relaxed">
+                      <p className="text-gray-600 mb-3 sm:mb-4 leading-relaxed text-sm sm:text-base">
                         {suggestion.description}
                       </p>
                       
                       {/* Show matching ingredients if user specified ingredients */}
                       {router.query.ingredients && router.query.ingredients.trim() !== '' && suggestion.ingredients && (
-                        <div className="mb-4">
-                          <p className="text-sm font-medium text-gray-700 mb-2">Available ingredients used:</p>
-                          <div className="flex flex-wrap gap-2">
+                        <div className="mb-3 sm:mb-4">
+                          <p className="text-xs sm:text-sm font-medium text-gray-700 mb-2">Available ingredients used:</p>
+                          <div className="flex flex-wrap gap-1.5 sm:gap-2">
                             {suggestion.ingredients
                               .filter(ingredient => 
                                 router.query.ingredients.toLowerCase().includes(ingredient.toLowerCase())
@@ -781,7 +781,7 @@ export default function Suggestions() {
                               .map((ingredient, idx) => (
                                 <span
                                   key={idx}
-                                  className="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full"
+                                  className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full"
                                 >
                                   {ingredient}
                                 </span>
@@ -790,30 +790,30 @@ export default function Suggestions() {
                         </div>
                       )}
 
-                      <div className="grid grid-cols-2 gap-3 mb-4">
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <Clock className="w-4 h-4" />
+                      <div className="grid grid-cols-2 gap-2 sm:gap-3 mb-3 sm:mb-4">
+                        <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-gray-600">
+                          <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                           <span>{suggestion.prep_time}</span>
                         </div>
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <Users className="w-4 h-4" />
+                        <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-gray-600">
+                          <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                           <span>{suggestion.serving_size}</span>
                         </div>
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <DollarSign className="w-4 h-4" />
+                        <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-gray-600">
+                          <DollarSign className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                           <span>{suggestion.estimated_cost}</span>
                         </div>
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <Utensils className="w-4 h-4" />
+                        <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-gray-600">
+                          <Utensils className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                           <span>{suggestion.difficulty}</span>
                         </div>
                       </div>
 
-                      <div className="flex flex-wrap gap-2 mb-4">
+                      <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-3 sm:mb-4">
                         {suggestion.tags.slice(0, 3).map((tag, tagIndex) => (
                           <span
                             key={tagIndex}
-                            className="px-3 py-1 bg-orange-100 text-orange-700 text-xs font-medium rounded-full"
+                            className="px-2 sm:px-3 py-0.5 sm:py-1 bg-orange-100 text-orange-700 text-xs font-medium rounded-full"
                           >
                             {tag}
                           </span>
@@ -822,7 +822,7 @@ export default function Suggestions() {
 
                       <button 
                         onClick={() => handleViewRecipe(suggestion)}
-                        className="w-full bg-orange-500 text-white font-semibold py-3 px-4 rounded-xl hover:bg-orange-600 transition-colors duration-200 transform hover:scale-105 active:scale-95"
+                        className="w-full bg-orange-500 text-white font-semibold py-2.5 sm:py-3 px-4 rounded-xl hover:bg-orange-600 transition-colors duration-200 transform hover:scale-105 active:scale-95 text-sm sm:text-base"
                       >
                         View Recipe
                       </button>
@@ -833,14 +833,14 @@ export default function Suggestions() {
             </div>
 
             {/* Desktop List */}
-            <div className="hidden md:grid gap-6">
+            <div className="hidden md:grid gap-4 sm:gap-6">
               {suggestions.map((suggestion, index) => (
                 <div
                   key={index}
-                  className="bg-gradient-to-br from-orange-50 to-pink-50 rounded-2xl p-6 border border-orange-100 transform hover:scale-105 transition-all duration-300"
+                  className="bg-gradient-to-br from-orange-50 to-pink-50 rounded-2xl p-4 sm:p-6 border border-orange-100 transform hover:scale-105 transition-all duration-300"
                 >
-                  <div className="flex items-start justify-between mb-4">
-                    <h3 className="text-xl font-bold text-gray-900 flex-1">
+                  <div className="flex items-start justify-between mb-3 sm:mb-4">
+                    <h3 className="text-lg sm:text-xl font-bold text-gray-900 flex-1">
                       {suggestion.name}
                     </h3>
                     <div className="flex items-center gap-1 text-orange-500">
@@ -851,13 +851,13 @@ export default function Suggestions() {
                     </div>
                   </div>
                   
-                  <p className="text-gray-600 mb-4 leading-relaxed">
+                  <p className="text-gray-600 mb-3 sm:mb-4 leading-relaxed text-sm sm:text-base">
                     {suggestion.description}
                   </p>
                   
                   {/* Show matching ingredients if user specified ingredients */}
                   {router.query.ingredients && router.query.ingredients.trim() !== '' && suggestion.ingredients && (
-                    <div className="mb-4">
+                    <div className="mb-3 sm:mb-4">
                       <p className="text-sm font-medium text-gray-700 mb-2">Available ingredients used:</p>
                       <div className="flex flex-wrap gap-2">
                         {suggestion.ingredients
@@ -876,30 +876,30 @@ export default function Suggestions() {
                     </div>
                   )}
 
-                  <div className="grid grid-cols-4 gap-4 mb-4">
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Clock className="w-4 h-4" />
+                  <div className="grid grid-cols-4 gap-3 sm:gap-4 mb-3 sm:mb-4">
+                    <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-gray-600">
+                      <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                       <span>{suggestion.prep_time}</span>
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Users className="w-4 h-4" />
+                    <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-gray-600">
+                      <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                       <span>{suggestion.serving_size}</span>
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <DollarSign className="w-4 h-4" />
+                    <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-gray-600">
+                      <DollarSign className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                       <span>{suggestion.estimated_cost}</span>
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Utensils className="w-4 h-4" />
+                    <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-gray-600">
+                      <Utensils className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                       <span>{suggestion.difficulty}</span>
                     </div>
                   </div>
 
-                  <div className="flex flex-wrap gap-2 mb-4">
+                  <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-3 sm:mb-4">
                     {suggestion.tags.slice(0, 3).map((tag, tagIndex) => (
                       <span
                         key={tagIndex}
-                        className="px-3 py-1 bg-orange-100 text-orange-700 text-xs font-medium rounded-full"
+                        className="px-2 sm:px-3 py-0.5 sm:py-1 bg-orange-100 text-orange-700 text-xs font-medium rounded-full"
                       >
                         {tag}
                       </span>
@@ -908,7 +908,7 @@ export default function Suggestions() {
 
                   <button 
                     onClick={() => handleViewRecipe(suggestion)}
-                    className="bg-orange-500 text-white font-semibold py-3 px-6 rounded-xl hover:bg-orange-600 transition-colors duration-200 transform hover:scale-105 active:scale-95"
+                    className="bg-orange-500 text-white font-semibold py-2.5 sm:py-3 px-4 sm:px-6 rounded-xl hover:bg-orange-600 transition-colors duration-200 transform hover:scale-105 active:scale-95 text-sm sm:text-base"
                   >
                     View Recipe
                   </button>
@@ -918,15 +918,15 @@ export default function Suggestions() {
 
             {/* AI Suggestions Info */}
             {suggestions.length > 0 && suggestions.some(s => s.is_ai_generated) && (
-              <div className="mt-6 text-center">
-                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+              <div className="mt-4 sm:mt-6 text-center">
+                <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 sm:p-4">
                   <div className="flex items-center justify-center gap-2 mb-2">
-                    <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
-                      <Sparkles className="w-4 h-4 text-blue-600" />
+                    <div className="w-5 h-5 sm:w-6 sm:h-6 bg-blue-100 rounded-full flex items-center justify-center">
+                      <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-blue-600" />
                     </div>
-                    <h3 className="text-lg font-semibold text-blue-900">AI-Enhanced Suggestions</h3>
+                    <h3 className="text-base sm:text-lg font-semibold text-blue-900">AI-Enhanced Suggestions</h3>
                   </div>
-                  <p className="text-blue-700 text-sm">
+                  <p className="text-blue-700 text-xs sm:text-sm">
                     You've explored all our database suggestions! Here are fresh AI-generated meal ideas tailored to your preferences. Click "Get More AI Suggestions" to see more.
                   </p>
                 </div>
@@ -935,25 +935,31 @@ export default function Suggestions() {
 
             {/* New Suggestions Button */}
             {suggestions.length > 0 && hasMoreSuggestions && (
-              <div className="mt-6 text-center">
+              <div className="mt-4 sm:mt-6 text-center">
                 <button
                   onClick={handleLoadMoreSuggestions}
                   disabled={loadingMore}
-                  className="bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold py-4 px-8 rounded-2xl shadow-lg transform hover:scale-105 active:scale-95 transition-all duration-200 disabled:opacity-50 disabled:transform-none"
+                  className="bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold py-3 sm:py-4 px-6 sm:px-8 rounded-2xl shadow-lg transform hover:scale-105 active:scale-95 transition-all duration-200 disabled:opacity-50 disabled:transform-none text-sm sm:text-base"
                 >
                   {loadingMore ? (
                     <div className="flex items-center justify-center gap-2">
-                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      Loading New Suggestions...
+                      <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      <span className="hidden sm:inline">Loading New Suggestions...</span>
+                      <span className="sm:hidden">Loading...</span>
                     </div>
                   ) : (
                     <div className="flex items-center justify-center gap-2">
-                      <Sparkles className="w-5 h-5" />
-                      {suggestions.some(s => s.is_ai_generated) ? 'Get More AI Suggestions' : 'Get New Suggestions'}
+                      <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
+                      <span className="hidden sm:inline">
+                        {suggestions.some(s => s.is_ai_generated) ? 'Get More AI Suggestions' : 'Get New Suggestions'}
+                      </span>
+                      <span className="sm:hidden">
+                        {suggestions.some(s => s.is_ai_generated) ? 'More AI' : 'More'}
+                      </span>
                     </div>
                   )}
                 </button>
-                <p className="text-sm text-gray-500 mt-2">
+                <p className="text-xs sm:text-sm text-gray-500 mt-2">
                   {suggestions.some(s => s.is_ai_generated) 
                     ? 'Click to see more AI-generated meal ideas' 
                     : 'Click to see different meal ideas for your preferences'

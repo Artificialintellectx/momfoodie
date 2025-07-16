@@ -2,6 +2,24 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Reset default margins and ensure full height */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow-x: hidden;
+}
+
+#__next {
+  min-height: 100vh;
+}
+
 /* Custom animations */
 @keyframes fade-in {
   from {
