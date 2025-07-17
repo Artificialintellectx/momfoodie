@@ -304,6 +304,7 @@ export default function Suggestions() {
     totalShown: 0
   });
   const [selectedRecipeId, setSelectedRecipeId] = useState(null);
+  const [selectedRecipe, setSelectedRecipe] = useState(null);
   const [isRecipeModalOpen, setIsRecipeModalOpen] = useState(false);
   const [hasInitialized, setHasInitialized] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -575,8 +576,17 @@ export default function Suggestions() {
   }, [router.isReady, router.query, hasInitialized, retryCount, loadingProgress]);
 
   const handleViewRecipe = (recipe) => {
-    // Open recipe modal instead of navigating to a separate page
-    setSelectedRecipeId(recipe.id);
+    // For AI-generated recipes, pass the recipe object directly
+    // For database recipes, pass the recipe ID
+    if (recipe.is_ai_generated) {
+      // AI-generated recipe - pass the recipe object directly
+      setSelectedRecipe(recipe);
+      setSelectedRecipeId(null);
+    } else {
+      // Database recipe - pass the recipe ID
+      setSelectedRecipeId(recipe.id);
+      setSelectedRecipe(null);
+    }
     setIsRecipeModalOpen(true);
   };
 
@@ -587,6 +597,7 @@ export default function Suggestions() {
   const handleCloseRecipeModal = () => {
     setIsRecipeModalOpen(false);
     setSelectedRecipeId(null);
+    setSelectedRecipe(null);
   };
 
   const handleLoadMoreSuggestions = async () => {
@@ -973,6 +984,7 @@ export default function Suggestions() {
         {/* Recipe Modal */}
         <RecipeModal
           recipeId={selectedRecipeId}
+          recipe={selectedRecipe}
           isOpen={isRecipeModalOpen}
           onClose={handleCloseRecipeModal}
         />

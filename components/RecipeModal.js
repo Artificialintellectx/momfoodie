@@ -39,41 +39,37 @@ const RecipeModalSkeleton = () => (
   </div>
 );
 
-export default function RecipeModal({ recipeId, isOpen, onClose }) {
+export default function RecipeModal({ recipeId, recipe: passedRecipe, isOpen, onClose }) {
   const [recipe, setRecipe] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const transformRecipe = useCallback((recipe) => {
-    // Generate smart tags based on recipe characteristics
-    const tags = generateSmartTags(recipe);
-    
-    // Estimate nutrition info based on ingredients
-    const nutritionInfo = estimateNutrition(recipe);
-    
-    // Determine difficulty based on prep time and ingredients
-    const difficulty = estimateDifficulty(recipe);
-    
-    // Estimate cost based on ingredients
-    const estimatedCost = estimateCost(recipe);
+  // Transform recipe data to match the expected format
+  const transformRecipe = useCallback((recipeData) => {
+    // Generate missing data for AI recipes
+    const tags = recipeData.tags || generateSmartTags(recipeData);
+    const nutritionInfo = recipeData.nutrition_info || estimateNutrition(recipeData);
+    const instructions = recipeData.instructions || generateInstructions(recipeData);
+    const difficulty = recipeData.difficulty || estimateDifficulty(recipeData);
+    const estimatedCost = recipeData.estimated_cost || estimateCost(recipeData);
+    const servingSize = recipeData.serving_size || estimateServingSize(recipeData);
 
     return {
-      id: recipe.id,
-      name: recipe.name,
-      description: recipe.description,
-      prep_time: recipe.prep_time,
-      ingredients: recipe.ingredients || [],
-      instructions: generateInstructions(recipe),
+      id: recipeData.id || Math.random().toString(36).substr(2, 9),
+      name: recipeData.name,
+      description: recipeData.description,
+      prep_time: recipeData.prep_time,
+      ingredients: recipeData.ingredients || [],
+      instructions: instructions,
       nutrition_info: nutritionInfo,
-      difficulty,
-      cuisine: 'Nigerian',
-      is_ai_generated: false,
-      tags,
-      serving_size: estimateServingSize(recipe),
+      difficulty: difficulty,
+      cuisine: recipeData.cuisine || 'Nigerian',
+      meal_type: recipeData.meal_type,
+      dietary_preference: recipeData.dietary_preference,
+      tags: tags,
+      serving_size: servingSize,
       estimated_cost: estimatedCost,
-      source: 'Database',
-      meal_type: recipe.meal_type,
-      dietary_preference: recipe.dietary_preference
+      is_ai_generated: recipeData.is_ai_generated || false // Add this for the new source info
     };
   }, []);
 
@@ -110,10 +106,26 @@ export default function RecipeModal({ recipeId, isOpen, onClose }) {
   }, [transformRecipe]);
 
   useEffect(() => {
-    if (isOpen && recipeId) {
-      fetchRecipe(recipeId);
+    if (isOpen) {
+      if (passedRecipe) {
+        // If a recipe object is passed directly (AI-generated), use it
+        setLoading(true);
+        try {
+          const transformedRecipe = transformRecipe(passedRecipe);
+          setRecipe(transformedRecipe);
+          setError(null);
+        } catch (error) {
+          console.error('Error processing recipe:', error);
+          setError('Failed to process recipe');
+        } finally {
+          setLoading(false);
+        }
+      } else if (recipeId) {
+        // If a recipeId is passed, fetch from database
+        fetchRecipe(recipeId);
+      }
     }
-  }, [isOpen, recipeId, fetchRecipe]);
+  }, [isOpen, recipeId, passedRecipe, fetchRecipe, transformRecipe]);
 
   const generateSmartTags = (recipe) => {
     const tags = ['Nigerian', 'Authentic'];
@@ -315,7 +327,7 @@ export default function RecipeModal({ recipeId, isOpen, onClose }) {
 
               {/* Tags */}
               <div className="flex flex-wrap gap-2 mb-6">
-                {recipe.tags.map((tag, index) => (
+                {(recipe.tags || []).map((tag, index) => (
                   <span
                     key={index}
                     className="px-3 py-1 bg-orange-100 text-orange-700 text-sm font-medium rounded-full"
@@ -333,7 +345,7 @@ export default function RecipeModal({ recipeId, isOpen, onClose }) {
                 </h3>
                 <div className="bg-gray-50 rounded-xl p-4">
                   <ul className="space-y-2">
-                    {recipe.ingredients.map((ingredient, index) => (
+                    {(recipe.ingredients || []).map((ingredient, index) => (
                       <li key={index} className="flex items-center gap-3">
                         <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
                         <span className="text-gray-700">{ingredient}</span>
@@ -351,7 +363,7 @@ export default function RecipeModal({ recipeId, isOpen, onClose }) {
                 </h3>
                 <div className="bg-gray-50 rounded-xl p-4">
                   <ol className="space-y-3">
-                    {recipe.instructions.map((instruction, index) => (
+                    {(recipe.instructions || []).map((instruction, index) => (
                       <li key={index} className="flex items-start gap-3">
                         <span className="flex-shrink-0 w-6 h-6 bg-orange-500 text-white rounded-full flex items-center justify-center text-sm font-semibold">
                           {index + 1}
@@ -372,19 +384,19 @@ export default function RecipeModal({ recipeId, isOpen, onClose }) {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="bg-red-50 rounded-xl p-3 text-center">
                     <p className="text-sm text-gray-600">Calories</p>
-                    <p className="font-semibold text-gray-900">{recipe.nutrition_info.calories}</p>
+                    <p className="font-semibold text-gray-900">{recipe.nutrition_info?.calories || '300-400'}</p>
                   </div>
                   <div className="bg-blue-50 rounded-xl p-3 text-center">
                     <p className="text-sm text-gray-600">Protein</p>
-                    <p className="font-semibold text-gray-900">{recipe.nutrition_info.protein}</p>
+                    <p className="font-semibold text-gray-900">{recipe.nutrition_info?.protein || '10-15g'}</p>
                   </div>
                   <div className="bg-green-50 rounded-xl p-3 text-center">
                     <p className="text-sm text-gray-600">Carbs</p>
-                    <p className="font-semibold text-gray-900">{recipe.nutrition_info.carbs}</p>
+                    <p className="font-semibold text-gray-900">{recipe.nutrition_info?.carbs || '40-60g'}</p>
                   </div>
                   <div className="bg-yellow-50 rounded-xl p-3 text-center">
                     <p className="text-sm text-gray-600">Fat</p>
-                    <p className="font-semibold text-gray-900">{recipe.nutrition_info.fat}</p>
+                    <p className="font-semibold text-gray-900">{recipe.nutrition_info?.fat || '10-20g'}</p>
                   </div>
                 </div>
               </div>
@@ -393,8 +405,18 @@ export default function RecipeModal({ recipeId, isOpen, onClose }) {
               <div className="bg-gray-50 rounded-xl p-4 text-center">
                 <div className="flex items-center justify-center gap-2 text-gray-600">
                   <Star className="w-4 h-4 fill-current text-orange-500" />
-                  <span className="text-sm">Recipe from our authentic Nigerian database</span>
+                  <span className="text-sm">
+                    {recipe.is_ai_generated 
+                      ? 'AI-generated recipe with traditional Nigerian cooking methods. Follow food safety guidelines and adjust seasoning to taste.'
+                      : 'Recipe from our authentic Nigerian database'
+                    }
+                  </span>
                 </div>
+                {recipe.is_ai_generated && (
+                  <p className="text-xs text-gray-500 mt-2">
+                    Cooking times and temperatures are estimates. Always ensure food is cooked to safe internal temperatures.
+                  </p>
+                )}
               </div>
             </div>
           </div>
