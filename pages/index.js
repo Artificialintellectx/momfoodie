@@ -238,8 +238,8 @@ export default function Home() {
   const cuisineOptions = [
     { value: '', label: 'Any Nigerian Cuisine', icon: '🇳🇬' },
     { value: 'yoruba', label: 'Yoruba Cuisine', icon: '🫘', popular: true },
-    { value: 'igbo', label: 'Igbo Cuisine', icon: '🥜' },
-    { value: 'hausa', label: 'Hausa Cuisine', icon: '🌾' },
+    { value: 'igbo', label: 'Igbo Cuisine', icon: '🥜', popular: true },
+    { value: 'hausa', label: 'Hausa Cuisine', icon: '🌾', popular: true },
     { value: 'edo', label: 'Edo Cuisine', icon: '🍠' },
     { value: 'ibibio', label: 'Ibibio Cuisine', icon: '🐟' },
     { value: 'ijaw', label: 'Ijaw Cuisine', icon: '🦐' },
@@ -284,6 +284,30 @@ export default function Home() {
         ) : (
           <div className="bg-white rounded-2xl shadow-lg p-6 mb-6 border border-gray-100">
           <form onSubmit={handleSubmit} className="space-y-6">
+          
+          {/* Progress Indicator */}
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-medium text-gray-600">Form Progress</span>
+              <span className="text-xs font-medium text-gray-600">
+                {[mealType, cuisine, dietaryPreference].filter(Boolean).length}/3 completed
+              </span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div 
+                className="bg-gradient-to-r from-orange-500 to-pink-500 h-2 rounded-full transition-all duration-500 ease-out"
+                style={{ 
+                  width: `${([mealType, cuisine, dietaryPreference].filter(Boolean).length / 3) * 100}%` 
+                }}
+              ></div>
+            </div>
+            <div className="flex justify-between mt-1">
+              <span className={`text-xs ${mealType ? 'text-orange-600 font-medium' : 'text-gray-400'}`}>Meal Type</span>
+              <span className={`text-xs ${cuisine ? 'text-orange-600 font-medium' : 'text-gray-400'}`}>Cuisine</span>
+              <span className={`text-xs ${dietaryPreference ? 'text-orange-600 font-medium' : 'text-gray-400'}`}>Dietary</span>
+            </div>
+          </div>
+
           {/* Meal Type Selection */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-3">
@@ -308,15 +332,74 @@ export default function Home() {
             </div>
           </div>
 
-            {/* Cuisine Selection */}
-            <div>
+            {/* Enhanced Cuisine Selection */}
+            <div className={`relative ${!cuisine ? 'animate-pulse' : ''} ${mealType && !cuisine ? 'ring-2 ring-orange-200 ring-opacity-50 rounded-xl p-2 -m-2' : ''}`}>
+              <div className="flex items-center gap-2 mb-3">
+                <label className="block text-sm font-semibold text-gray-700">
+                  Choose Your Cuisine
+                </label>
+                <div className="flex items-center gap-1">
+                  <span className="text-xs bg-orange-100 text-orange-600 px-2 py-0.5 rounded-full font-medium">
+                    Popular
+                  </span>
+                  <span className="text-xs text-gray-500">• Get authentic recipes</span>
+                </div>
+              </div>
+              
+              {/* Quick Selection for Popular Cuisines */}
+              <div className="mb-4">
+                <div className="text-xs text-gray-600 mb-2">Quick pick popular cuisines:</div>
+                <div className="flex flex-wrap gap-2">
+                  {cuisineOptions.filter(opt => opt.popular).map((option) => (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => setCuisine(option.value)}
+                      className={`px-3 py-2 rounded-lg border-2 transition-all duration-200 transform hover:scale-105 active:scale-95 text-sm font-medium ${
+                        cuisine === option.value
+                          ? 'border-orange-500 bg-orange-50 text-orange-700 shadow-md'
+                          : 'border-gray-200 bg-white text-gray-600 hover:border-orange-300 hover:bg-orange-25'
+                      }`}
+                    >
+                      <span className="mr-1">{option.icon}</span>
+                      {option.label.replace(' Cuisine', '')}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Full Cuisine Dropdown */}
               <CustomDropdown
-                label="Preferred Cuisine"
+                label=""
                 options={cuisineOptions}
                 value={cuisine}
                 onChange={setCuisine}
-                placeholder="Select cuisine"
+                placeholder="Or select any Nigerian cuisine..."
               />
+              
+              {/* Success Indicator */}
+              {cuisine && (
+                <div className="mt-3 p-2 bg-green-50 border border-green-200 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <div className="text-green-500">✅</div>
+                    <div className="text-sm text-green-700 font-medium">
+                      Great choice! We'll suggest authentic {cuisineOptions.find(opt => opt.value === cuisine)?.label.toLowerCase()} recipes.
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {/* Cuisine Selection Helper */}
+              {!cuisine && (
+                <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div className="flex items-start gap-2">
+                    <div className="text-blue-500 mt-0.5">💡</div>
+                    <div className="text-sm text-blue-700">
+                      <strong>Tip:</strong> Choosing a specific cuisine helps us suggest authentic, traditional recipes that match your cultural preferences.
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Dietary Preference */}

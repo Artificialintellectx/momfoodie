@@ -41,8 +41,8 @@ export default function CustomDropdown({ options, value, onChange, placeholder =
           disabled 
             ? 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed' 
             : open 
-              ? 'border-orange-400' 
-              : 'border-gray-200'
+              ? 'border-orange-400 shadow-lg' 
+              : 'border-gray-200 hover:border-orange-300'
         }`}
         aria-haspopup="listbox"
         aria-expanded={open}
@@ -54,7 +54,7 @@ export default function CustomDropdown({ options, value, onChange, placeholder =
           {selected ? (
             <span className="text-lg flex-shrink-0">{selected.icon}</span>
           ) : (
-            <span className="text-lg text-gray-400 flex-shrink-0">•</span>
+            <span className="text-lg text-gray-400 flex-shrink-0">🍽️</span>
           )}
           <span className={`min-w-0 break-words ${selected ? 'text-gray-900 font-medium' : 'text-gray-400'}`}>
             {selected ? selected.label : placeholder}
@@ -78,7 +78,7 @@ export default function CustomDropdown({ options, value, onChange, placeholder =
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:hidden">
           <div className="bg-white/95 backdrop-blur-xl border-2 border-gray-100 rounded-2xl shadow-2xl py-4 w-full max-w-xs max-h-80 overflow-y-auto overflow-x-hidden">
             <div className="px-4 pb-2 border-b border-gray-100">
-              <h3 className="text-lg font-semibold text-gray-900 break-words">{label}</h3>
+              <h3 className="text-lg font-semibold text-gray-900 break-words">{label || 'Select Option'}</h3>
             </div>
             <div className="py-2">
               {options.map((option) => (
@@ -94,7 +94,16 @@ export default function CustomDropdown({ options, value, onChange, placeholder =
                   }}
                 >
                   <span className="text-lg flex-shrink-0 mt-0.5">{option.icon}</span>
-                  <span className="font-medium break-words flex-1 leading-relaxed min-w-0">{option.label}</span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium break-words leading-relaxed">{option.label}</span>
+                      {option.popular && (
+                        <span className="text-xs bg-orange-100 text-orange-600 px-2 py-0.5 rounded-full font-medium flex-shrink-0">
+                          Popular
+                        </span>
+                      )}
+                    </div>
+                  </div>
                   {value === option.value && (
                     <svg className="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -124,7 +133,16 @@ export default function CustomDropdown({ options, value, onChange, placeholder =
                 }}
               >
                 <span className="text-lg flex-shrink-0 mt-0.5">{option.icon}</span>
-                <span className="font-medium break-words flex-1 leading-relaxed">{option.label}</span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium break-words leading-relaxed">{option.label}</span>
+                    {option.popular && (
+                      <span className="text-xs bg-orange-100 text-orange-600 px-2 py-0.5 rounded-full font-medium flex-shrink-0">
+                        Popular
+                      </span>
+                    )}
+                  </div>
+                </div>
                 {value === option.value && (
                   <svg className="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
