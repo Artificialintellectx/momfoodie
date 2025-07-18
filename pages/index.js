@@ -5,39 +5,39 @@ import CustomDropdown from '../components/CustomDropdown';
 
 // Loading Skeleton Components
 const FormSkeleton = () => (
-  <div className="bg-white rounded-2xl shadow-lg p-6 mb-6 border border-gray-100">
-    <div className="space-y-6">
+  <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 mb-6 border border-gray-100">
+    <div className="space-y-5 sm:space-y-6">
       {/* Meal Type Skeleton */}
       <div>
-        <div className="h-4 bg-gray-200 rounded w-48 mb-3 skeleton-wave"></div>
-        <div className="grid grid-cols-3 gap-3">
+        <div className="h-4 bg-gray-200 rounded w-40 sm:w-48 mb-3 skeleton-wave"></div>
+        <div className="grid grid-cols-3 gap-2 sm:gap-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-20 bg-gray-100 rounded-xl skeleton-pulse"></div>
+            <div key={i} className="h-20 sm:h-24 bg-gray-100 rounded-xl skeleton-pulse"></div>
           ))}
         </div>
       </div>
       
       {/* Cuisine Skeleton */}
       <div>
-        <div className="h-4 bg-gray-200 rounded w-36 mb-3 skeleton-wave"></div>
-        <div className="h-14 bg-gray-100 rounded-xl skeleton-pulse"></div>
+        <div className="h-4 bg-gray-200 rounded w-32 sm:w-36 mb-3 skeleton-wave"></div>
+        <div className="h-14 sm:h-12 bg-gray-100 rounded-xl skeleton-pulse"></div>
       </div>
       
       {/* Dietary Preference Skeleton */}
       <div>
-        <div className="h-4 bg-gray-200 rounded w-40 mb-3 skeleton-wave"></div>
-        <div className="h-14 bg-gray-100 rounded-xl skeleton-pulse"></div>
+        <div className="h-4 bg-gray-200 rounded w-36 sm:w-40 mb-3 skeleton-wave"></div>
+        <div className="h-14 sm:h-12 bg-gray-100 rounded-xl skeleton-pulse"></div>
       </div>
       
       {/* Ingredients Skeleton */}
       <div>
-        <div className="h-4 bg-gray-200 rounded w-44 mb-3 skeleton-wave"></div>
+        <div className="h-4 bg-gray-200 rounded w-40 sm:w-44 mb-3 skeleton-wave"></div>
         <div className="h-24 bg-gray-100 rounded-xl skeleton-pulse"></div>
       </div>
       
       {/* Suggestion Count Skeleton */}
       <div>
-        <div className="h-4 bg-gray-200 rounded w-40 mb-3 skeleton-wave"></div>
+        <div className="h-4 bg-gray-200 rounded w-36 sm:w-40 mb-3 skeleton-wave"></div>
         <div className="flex gap-2">
           {[1, 2, 3].map((i) => (
             <div key={i} className="flex-1 h-12 bg-gray-100 rounded-xl skeleton-pulse"></div>
@@ -49,49 +49,49 @@ const FormSkeleton = () => (
 );
 
 const SuggestionCardSkeleton = () => (
-  <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-6 border border-gray-200">
-    <div className="flex items-start justify-between mb-4">
-      <div className="h-6 bg-gray-200 rounded w-3/4 skeleton-wave"></div>
-      <div className="h-4 bg-gray-200 rounded w-8 skeleton-pulse"></div>
+  <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-4 sm:p-6 border border-gray-200">
+    <div className="flex items-start justify-between mb-3 sm:mb-4">
+      <div className="h-5 sm:h-6 bg-gray-200 rounded w-3/4 skeleton-wave"></div>
+      <div className="h-3 sm:h-4 bg-gray-200 rounded w-8 skeleton-pulse"></div>
     </div>
     
-    <div className="space-y-2 mb-4">
-      <div className="h-4 bg-gray-200 rounded w-full skeleton-wave"></div>
-      <div className="h-4 bg-gray-200 rounded w-5/6 skeleton-wave"></div>
-      <div className="h-4 bg-gray-200 rounded w-4/6 skeleton-wave"></div>
+    <div className="space-y-2 mb-3 sm:mb-4">
+      <div className="h-3 sm:h-4 bg-gray-200 rounded w-full skeleton-wave"></div>
+      <div className="h-3 sm:h-4 bg-gray-200 rounded w-5/6 skeleton-wave"></div>
+      <div className="h-3 sm:h-4 bg-gray-200 rounded w-4/6 skeleton-wave"></div>
     </div>
 
-    <div className="grid grid-cols-2 gap-3 mb-4 md:grid-cols-4">
+    <div className="grid grid-cols-2 gap-2 sm:gap-3 mb-3 sm:mb-4 md:grid-cols-4">
       {[1, 2, 3, 4].map((i) => (
         <div key={i} className="flex items-center gap-2">
-          <div className="w-4 h-4 bg-gray-200 rounded skeleton-pulse"></div>
-          <div className="h-3 bg-gray-200 rounded w-16 skeleton-wave"></div>
+          <div className="w-3 h-3 sm:w-4 sm:h-4 bg-gray-200 rounded skeleton-pulse"></div>
+          <div className="h-2.5 sm:h-3 bg-gray-200 rounded w-12 sm:w-16 skeleton-wave"></div>
         </div>
       ))}
     </div>
 
-    <div className="flex gap-2 mb-4">
+    <div className="flex gap-2 mb-3 sm:mb-4">
       {[1, 2, 3].map((i) => (
-        <div key={i} className="h-6 bg-gray-200 rounded-full w-16 skeleton-pulse"></div>
+        <div key={i} className="h-5 sm:h-6 bg-gray-200 rounded-full w-12 sm:w-16 skeleton-pulse"></div>
       ))}
     </div>
 
-    <div className="h-12 bg-gray-200 rounded-xl skeleton-wave"></div>
+    <div className="h-10 sm:h-12 bg-gray-200 rounded-xl skeleton-wave"></div>
   </div>
 );
 
 const SuggestionsSkeleton = () => (
-  <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-    <div className="flex items-center gap-2 mb-6">
-      <div className="p-2 bg-gray-200 rounded-full w-9 h-9 skeleton-pulse"></div>
-      <div className="h-7 bg-gray-200 rounded w-48 skeleton-wave"></div>
+  <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 border border-gray-100">
+    <div className="flex items-center gap-2 mb-4 sm:mb-6">
+      <div className="p-1.5 sm:p-2 bg-gray-200 rounded-full w-8 h-8 sm:w-9 sm:h-9 skeleton-pulse"></div>
+      <div className="h-6 sm:h-7 bg-gray-200 rounded w-40 sm:w-48 skeleton-wave"></div>
     </div>
 
     {/* Mobile Carousel Skeleton */}
     <div className="md:hidden">
-      <div className="flex gap-4 overflow-x-auto pb-4">
+      <div className="flex gap-3 sm:gap-4 overflow-x-auto pb-4">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="flex-shrink-0 w-80">
+          <div key={i} className="flex-shrink-0 w-72 sm:w-80">
             <SuggestionCardSkeleton />
           </div>
         ))}
@@ -99,7 +99,7 @@ const SuggestionsSkeleton = () => (
     </div>
 
     {/* Desktop List Skeleton */}
-    <div className="hidden md:grid gap-6">
+    <div className="hidden md:grid gap-4 sm:gap-6">
       {[1, 2, 3].map((i) => (
         <SuggestionCardSkeleton key={i} />
       ))}
@@ -108,12 +108,12 @@ const SuggestionsSkeleton = () => (
 );
 
 const HeaderSkeleton = () => (
-  <div className="text-center mb-8">
-    <div className="flex items-center justify-center gap-3 mb-4">
-      <div className="w-10 h-10 bg-gray-200 rounded-full skeleton-pulse"></div>
-      <div className="h-12 bg-gray-200 rounded w-48 skeleton-wave"></div>
+  <div className="text-center mb-6 sm:mb-8">
+    <div className="flex items-center justify-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+      <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gray-200 rounded-full skeleton-pulse"></div>
+      <div className="h-8 sm:h-12 bg-gray-200 rounded w-40 sm:w-48 skeleton-wave"></div>
     </div>
-    <div className="h-6 bg-gray-200 rounded w-80 mx-auto skeleton-wave"></div>
+    <div className="h-4 sm:h-6 bg-gray-200 rounded w-64 sm:w-80 mx-auto skeleton-wave"></div>
   </div>
 );
 
@@ -257,22 +257,22 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-[#f8fafc] font-sans pb-20">
-      <div className="container mx-auto px-4 py-6 max-w-2xl">
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 max-w-2xl">
         {/* Header */}
         {pageLoading ? (
           <HeaderSkeleton />
         ) : (
-          <div className="text-center mb-8">
-            <div className="flex items-center justify-center gap-3 mb-4">
+          <div className="text-center mb-6 sm:mb-8">
+            <div className="flex items-center justify-center gap-2 sm:gap-3 mb-3 sm:mb-4">
             <div className="relative">
-                <ChefHat className="w-10 h-10 text-orange-500 animate-bounce" />
-                <div className="absolute -top-1 -right-1 w-3 h-3 bg-orange-400 rounded-full animate-pulse"></div>
+                <ChefHat className="w-8 h-8 sm:w-10 sm:h-10 text-orange-500 animate-bounce" />
+                <div className="absolute -top-1 -right-1 w-2 h-2 sm:w-3 sm:h-3 bg-orange-400 rounded-full animate-pulse"></div>
               </div>
-              <h1 className="text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-orange-500 to-pink-500 bg-clip-text text-transparent" style={{ fontFamily: 'Fredoka One, cursive' }}>
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-orange-500 to-pink-500 bg-clip-text text-transparent" style={{ fontFamily: 'Fredoka One, cursive' }}>
                 Mummyfoodie
               </h1>
             </div>
-            <p className="text-gray-600 text-lg font-medium">
+            <p className="text-gray-600 text-base sm:text-lg font-medium px-2">
               Never wonder what to cook again! Get personalized meal suggestions
             </p>
           </div>
@@ -282,11 +282,11 @@ export default function Home() {
         {pageLoading ? (
           <FormSkeleton />
         ) : (
-          <div className="bg-white rounded-2xl shadow-lg p-6 mb-6 border border-gray-100">
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 mb-6 border border-gray-100">
+          <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6">
           
           {/* Progress Indicator */}
-          <div className="mb-6">
+          <div className="mb-5 sm:mb-6">
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-medium text-gray-600">Form Progress</span>
               <span className="text-xs font-medium text-gray-600">
@@ -313,20 +313,20 @@ export default function Home() {
               <label className="block text-sm font-semibold text-gray-700 mb-3">
               What meal are you planning?
             </label>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-3 gap-2 sm:gap-3">
                 {mealTypeOptions.map((option) => (
                   <button
                     key={option.value}
                     type="button"
                     onClick={() => setMealType(option.value)}
-                    className={`p-4 rounded-xl border-2 transition-all duration-200 transform hover:scale-105 active:scale-95 ${
+                    className={`p-3 sm:p-4 rounded-xl border-2 transition-all duration-200 transform hover:scale-105 active:scale-95 min-h-[80px] sm:min-h-[100px] ${
                       mealType === option.value
                         ? 'border-orange-500 bg-orange-50 text-orange-700 shadow-md'
                         : 'border-gray-200 bg-gray-50 text-gray-600 hover:border-orange-300 hover:bg-orange-25'
                     }`}
                   >
-                    <div className="text-2xl mb-1">{option.icon}</div>
-                    <div className="text-sm font-medium">{option.label}</div>
+                    <div className="text-xl sm:text-2xl mb-1">{option.icon}</div>
+                    <div className="text-xs sm:text-sm font-medium leading-tight">{option.label}</div>
                 </button>
               ))}
             </div>
@@ -334,7 +334,7 @@ export default function Home() {
 
             {/* Enhanced Cuisine Selection */}
             <div className={`relative ${!cuisine ? 'animate-pulse' : ''} ${mealType && !cuisine ? 'ring-2 ring-orange-200 ring-opacity-50 rounded-xl p-2 -m-2' : ''}`}>
-              <div className="flex items-center gap-2 mb-3">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-3">
                 <label className="block text-sm font-semibold text-gray-700">
                   Choose Your Cuisine
                 </label>
@@ -342,7 +342,7 @@ export default function Home() {
                   <span className="text-xs bg-orange-100 text-orange-600 px-2 py-0.5 rounded-full font-medium">
                     Popular
                   </span>
-                  <span className="text-xs text-gray-500">• Get authentic recipes</span>
+                  <span className="text-xs text-gray-500 hidden sm:inline">• Get authentic recipes</span>
                 </div>
               </div>
               
@@ -355,14 +355,15 @@ export default function Home() {
                       key={option.value}
                       type="button"
                       onClick={() => setCuisine(option.value)}
-                      className={`px-3 py-2 rounded-lg border-2 transition-all duration-200 transform hover:scale-105 active:scale-95 text-sm font-medium ${
+                      className={`px-3 py-2.5 rounded-lg border-2 transition-all duration-200 transform hover:scale-105 active:scale-95 text-sm font-medium min-h-[44px] flex items-center justify-center ${
                         cuisine === option.value
                           ? 'border-orange-500 bg-orange-50 text-orange-700 shadow-md'
                           : 'border-gray-200 bg-white text-gray-600 hover:border-orange-300 hover:bg-orange-25'
                       }`}
                     >
                       <span className="mr-1">{option.icon}</span>
-                      {option.label.replace(' Cuisine', '')}
+                      <span className="hidden sm:inline">{option.label.replace(' Cuisine', '')}</span>
+                      <span className="sm:hidden">{option.label.replace(' Cuisine', '').split(' ')[0]}</span>
                     </button>
                   ))}
                 </div>
@@ -422,7 +423,7 @@ export default function Home() {
                 value={ingredients}
                 onChange={(e) => setIngredients(e.target.value)}
                 placeholder="e.g., chicken, rice, tomatoes, spinach..."
-                className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:outline-none transition-all duration-200 resize-none"
+                className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:outline-none transition-all duration-200 resize-none text-base"
                 rows="3"
               />
             </div>
@@ -445,22 +446,22 @@ export default function Home() {
                   </div>
         )}
 
-        {/* Sticky Action Buttons */}
+        {/* Enhanced Sticky Action Buttons for Mobile */}
         {!pageLoading && (
-          <div className="fixed bottom-6 left-4 right-4 z-40 md:hidden">
+          <div className="fixed bottom-4 left-3 right-3 z-40 md:hidden">
             <div className="flex gap-3">
               <button
                 onClick={handleSubmit}
-                className="flex-1 bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold py-4 px-6 rounded-2xl shadow-lg transform hover:scale-105 active:scale-95 transition-all duration-200"
+                className="flex-1 bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold py-4 px-6 rounded-2xl shadow-lg transform hover:scale-105 active:scale-95 transition-all duration-200 min-h-[56px] flex items-center justify-center"
               >
                 <div className="flex items-center justify-center gap-2">
                   <Sparkles className="w-5 h-5" />
-                  Get Suggestions
+                  <span className="text-base">Get Suggestions</span>
                 </div>
               </button>
               <button
                 onClick={() => setShowFeedback(true)}
-                className="bg-white text-orange-500 font-bold py-4 px-4 rounded-2xl shadow-lg border-2 border-orange-200 transform hover:scale-105 active:scale-95 transition-all duration-200"
+                className="bg-white text-orange-500 font-bold py-4 px-4 rounded-2xl shadow-lg border-2 border-orange-200 transform hover:scale-105 active:scale-95 transition-all duration-200 min-h-[56px] min-w-[56px] flex items-center justify-center"
               >
                 <MessageCircle className="w-6 h-6" />
               </button>
@@ -477,25 +478,25 @@ export default function Home() {
 
       {/* Feedback Modal */}
       {showFeedback && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">Share Feedback</h2>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-3 sm:p-4 z-50">
+          <div className="bg-white rounded-2xl p-4 sm:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-4 sm:mb-6">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Share Feedback</h2>
               <button
                 onClick={() => setShowFeedback(false)}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
+                className="text-gray-400 hover:text-gray-600 transition-colors p-2 -m-2 rounded-lg hover:bg-gray-100"
               >
-                ✕
+                <X className="w-5 h-5" />
               </button>
             </div>
 
             {feedbackSent ? (
-              <div className="text-center py-8">
-                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Heart className="w-8 h-8 text-green-500 fill-current" />
+              <div className="text-center py-6 sm:py-8">
+                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Heart className="w-6 h-6 sm:w-8 sm:h-8 text-green-500 fill-current" />
                 </div>
-                <h3 className="text-2xl font-bold text-green-600 mb-4">Thank you!</h3>
-                <p className="text-gray-600">We appreciate your feedback and will use it to improve Mummyfoodie.</p>
+                <h3 className="text-xl sm:text-2xl font-bold text-green-600 mb-4">Thank you!</h3>
+                <p className="text-gray-600 text-sm sm:text-base">We appreciate your feedback and will use it to improve Mummyfoodie.</p>
               </div>
             ) : (
               <form onSubmit={handleFeedbackSubmit} className="space-y-4">
@@ -507,7 +508,7 @@ export default function Home() {
                     value={feedbackMessage}
                     onChange={(e) => setFeedbackMessage(e.target.value)}
                     placeholder="Tell us what you think about Mummyfoodie..."
-                    className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:outline-none transition-all duration-200 resize-none"
+                    className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:outline-none transition-all duration-200 resize-none text-base"
                     rows="4"
                     required
                   />
@@ -515,7 +516,7 @@ export default function Home() {
                 <button
                   type="submit"
                   disabled={feedbackLoading}
-                  className="w-full bg-orange-500 text-white font-bold py-3 px-6 rounded-xl hover:bg-orange-600 transition-all duration-200 disabled:opacity-50 transform hover:scale-105 active:scale-95"
+                  className="w-full bg-orange-500 text-white font-bold py-3 sm:py-4 px-6 rounded-xl hover:bg-orange-600 transition-all duration-200 disabled:opacity-50 transform hover:scale-105 active:scale-95 min-h-[48px] flex items-center justify-center"
                 >
                   {feedbackLoading ? 'Sending...' : 'Send Feedback'}
                 </button>

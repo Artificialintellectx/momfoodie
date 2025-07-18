@@ -37,7 +37,7 @@ export default function CustomDropdown({ options, value, onChange, placeholder =
         ref={buttonRef}
         type="button"
         disabled={disabled}
-        className={`w-full flex items-center justify-between px-4 py-3 rounded-full border-2 focus:outline-none transition-all duration-200 bg-white/70 backdrop-blur-md shadow-md ${
+        className={`w-full flex items-center justify-between px-4 py-3.5 sm:py-3 rounded-full border-2 focus:outline-none transition-all duration-200 bg-white/70 backdrop-blur-md shadow-md min-h-[48px] sm:min-h-[44px] ${
           disabled 
             ? 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed' 
             : open 
@@ -56,7 +56,7 @@ export default function CustomDropdown({ options, value, onChange, placeholder =
           ) : (
             <span className="text-lg text-gray-400 flex-shrink-0">🍽️</span>
           )}
-          <span className={`min-w-0 break-words ${selected ? 'text-gray-900 font-medium' : 'text-gray-400'}`}>
+          <span className={`min-w-0 break-words text-sm sm:text-base ${selected ? 'text-gray-900 font-medium' : 'text-gray-400'}`}>
             {selected ? selected.label : placeholder}
           </span>
         </div>
@@ -76,8 +76,8 @@ export default function CustomDropdown({ options, value, onChange, placeholder =
       {/* Mobile Dropdown - Centered */}
       {open && !disabled && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:hidden">
-          <div className="bg-white/95 backdrop-blur-xl border-2 border-gray-100 rounded-2xl shadow-2xl py-4 w-full max-w-xs max-h-80 overflow-y-auto overflow-x-hidden">
-            <div className="px-4 pb-2 border-b border-gray-100">
+          <div className="bg-white/95 backdrop-blur-xl border-2 border-gray-100 rounded-2xl shadow-2xl py-4 w-full max-w-sm max-h-[70vh] overflow-y-auto overflow-x-hidden">
+            <div className="px-4 pb-3 border-b border-gray-100">
               <h3 className="text-lg font-semibold text-gray-900 break-words">{label || 'Select Option'}</h3>
             </div>
             <div className="py-2">
@@ -85,7 +85,7 @@ export default function CustomDropdown({ options, value, onChange, placeholder =
                 <button
                   key={option.value}
                   type="button"
-                  className={`w-full flex items-start gap-3 px-4 py-3 text-left transition-colors duration-150 hover:bg-orange-50 focus:bg-orange-100 rounded-xl mx-2 ${
+                  className={`w-full flex items-start gap-3 px-4 py-4 text-left transition-colors duration-150 hover:bg-orange-50 focus:bg-orange-100 rounded-xl mx-2 min-h-[56px] ${
                     value === option.value ? 'bg-orange-100 text-orange-700 font-semibold' : 'text-gray-700'
                   }`}
                   onClick={() => {
@@ -96,7 +96,7 @@ export default function CustomDropdown({ options, value, onChange, placeholder =
                   <span className="text-lg flex-shrink-0 mt-0.5">{option.icon}</span>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="font-medium break-words leading-relaxed">{option.label}</span>
+                      <span className="font-medium break-words leading-relaxed text-sm sm:text-base">{option.label}</span>
                       {option.popular && (
                         <span className="text-xs bg-orange-100 text-orange-600 px-2 py-0.5 rounded-full font-medium flex-shrink-0">
                           Popular
