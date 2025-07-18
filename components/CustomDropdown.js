@@ -28,8 +28,19 @@ export default function CustomDropdown({ options, value, onChange, placeholder =
 
   const selected = options.find((opt) => opt.value === value);
 
+  // Ensure the dropdown properly reflects the selected state
+  useEffect(() => {
+    if (selected && open) {
+      // If there's a selected value and dropdown is open, ensure proper rendering
+      const dropdownElement = containerRef.current?.querySelector('.dropdown-options');
+      if (dropdownElement) {
+        dropdownElement.scrollTop = 0;
+      }
+    }
+  }, [selected, open]);
+
   return (
-    <div className="w-full relative" ref={containerRef}>
+    <div className="w-full relative z-10" ref={containerRef}>
       {label && (
         <label className="block text-sm font-semibold text-gray-700 mb-3">{label}</label>
       )}
@@ -42,7 +53,9 @@ export default function CustomDropdown({ options, value, onChange, placeholder =
             ? 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed' 
             : open 
               ? 'border-orange-400 shadow-lg' 
-              : 'border-gray-200 hover:border-orange-300'
+              : selected
+                ? 'border-orange-300 bg-orange-25'
+                : 'border-gray-200 hover:border-orange-300'
         }`}
         aria-haspopup="listbox"
         aria-expanded={open}
@@ -65,66 +78,67 @@ export default function CustomDropdown({ options, value, onChange, placeholder =
         </svg>
       </button>
       
-      {/* Backdrop */}
+      {/* Mobile Dropdown - Centered with proper z-index */}
       {open && !disabled && (
-        <div 
-          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40"
-          onClick={() => setOpen(false)}
-        />
-      )}
-      
-      {/* Mobile Dropdown - Centered */}
-      {open && !disabled && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:hidden">
-          <div className="bg-white/95 backdrop-blur-xl border-2 border-gray-100 rounded-2xl shadow-2xl py-4 w-full max-w-sm max-h-[70vh] overflow-y-auto overflow-x-hidden">
-            <div className="px-4 pb-3 border-b border-gray-100">
-              <h3 className="text-lg font-semibold text-gray-900 break-words">{label || 'Select Option'}</h3>
-            </div>
-            <div className="py-2">
-              {options.map((option) => (
-                <button
-                  key={option.value}
-                  type="button"
-                  className={`w-full flex items-start gap-3 px-4 py-4 text-left transition-colors duration-150 hover:bg-orange-50 focus:bg-orange-100 rounded-xl mx-2 min-h-[56px] ${
-                    value === option.value ? 'bg-orange-100 text-orange-700 font-semibold' : 'text-gray-700'
-                  }`}
-                  onClick={() => {
-                    onChange(option.value);
-                    setOpen(false);
-                  }}
-                >
-                  <span className="text-lg flex-shrink-0 mt-0.5">{option.icon}</span>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium break-words leading-relaxed text-sm sm:text-base">{option.label}</span>
-                      {option.popular && (
-                        <span className="text-xs bg-orange-100 text-orange-600 px-2 py-0.5 rounded-full font-medium flex-shrink-0">
-                          Popular
-                        </span>
-                      )}
+        <>
+          {/* Backdrop with higher z-index */}
+          <div 
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9998]"
+            onClick={() => setOpen(false)}
+          />
+          
+          {/* Modal container with highest z-index */}
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 md:hidden">
+            <div className="bg-white border-2 border-gray-200 rounded-2xl shadow-2xl py-4 w-full max-w-sm max-h-[70vh] overflow-y-auto overflow-x-hidden dropdown-options">
+              <div className="px-4 pb-3 border-b border-gray-100">
+                <h3 className="text-lg font-semibold text-gray-900 break-words">{label || 'Select Option'}</h3>
+              </div>
+              <div className="py-2">
+                {options.map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    className={`w-full flex items-start gap-3 px-4 py-4 text-left transition-colors duration-150 hover:bg-orange-50 focus:bg-orange-100 rounded-xl mx-2 min-h-[56px] ${
+                      value === option.value ? 'bg-orange-100 text-orange-700 font-semibold' : 'text-gray-700'
+                    }`}
+                    onClick={() => {
+                      onChange(option.value);
+                      setOpen(false);
+                    }}
+                  >
+                    <span className="text-lg flex-shrink-0 mt-0.5">{option.icon}</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium break-words leading-relaxed text-sm sm:text-base">{option.label}</span>
+                        {option.popular && (
+                          <span className="text-xs bg-orange-100 text-orange-600 px-2 py-0.5 rounded-full font-medium flex-shrink-0">
+                            Popular
+                          </span>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                  {value === option.value && (
-                    <svg className="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                  )}
-                </button>
-              ))}
+                    {value === option.value && (
+                      <svg className="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    )}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
+        </>
       )}
       
       {/* Desktop Dropdown - Relative positioning */}
       {open && !disabled && (
-        <div className="hidden md:block absolute left-0 right-0 mt-2 z-50">
-          <div className="bg-white/95 backdrop-blur-xl border-2 border-gray-100 rounded-2xl shadow-2xl py-2 max-h-64 overflow-y-auto">
+        <div className="hidden md:block absolute left-0 right-0 mt-2 z-[9999] isolate">
+          <div className="bg-white border-2 border-gray-200 rounded-2xl shadow-2xl py-2 max-h-64 overflow-y-auto relative dropdown-options">
             {options.map((option) => (
               <button
                 key={option.value}
                 type="button"
-                className={`w-full flex items-start gap-3 px-5 py-3 text-left transition-colors duration-150 hover:bg-orange-50 focus:bg-orange-100 rounded-xl ${
+                className={`w-full flex items-start gap-3 px-5 py-3 text-left transition-colors duration-150 hover:bg-orange-50 focus:bg-orange-100 rounded-xl relative ${
                   value === option.value ? 'bg-orange-100 text-orange-700 font-semibold' : 'text-gray-700'
                 }`}
                 onClick={() => {
