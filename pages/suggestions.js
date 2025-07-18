@@ -313,6 +313,10 @@ export default function Suggestions() {
   const [suggestionsReady, setSuggestionsReady] = useState(false);
   const [currentStage, setCurrentStage] = useState(0);
   const isGeneratingRef = useRef(false);
+  
+  // New state for suggestion history
+  const [suggestionHistory, setSuggestionHistory] = useState([]);
+  const [currentHistoryIndex, setCurrentHistoryIndex] = useState(-1);
 
   // Debug loadingProgress changes
   useEffect(() => {
@@ -340,6 +344,48 @@ export default function Suggestions() {
       setCurrentStage(newStage);
     }
   }, [loadingProgress, currentStage]);
+
+  // Function to add suggestions to history
+  const addToHistory = (newSuggestions, metadata) => {
+    const historyEntry = {
+      suggestions: newSuggestions,
+      metadata: metadata,
+      timestamp: new Date().toISOString(),
+      criteria: {
+        mealType: router.query.mealType,
+        dietaryPreference: router.query.dietaryPreference,
+        cuisine: router.query.cuisine,
+        ingredients: router.query.ingredients
+      }
+    };
+
+    setSuggestionHistory(prevHistory => {
+      // Remove any entries after current index (if we're going back and then loading new suggestions)
+      const trimmedHistory = prevHistory.slice(0, currentHistoryIndex + 1);
+      return [...trimmedHistory, historyEntry];
+    });
+    
+    setCurrentHistoryIndex(prevIndex => prevIndex + 1);
+  };
+
+  // Function to go back to previous suggestions
+  const handleGoBack = () => {
+    if (currentHistoryIndex > 0) {
+      const newIndex = currentHistoryIndex - 1;
+      const previousEntry = suggestionHistory[newIndex];
+      
+      setSuggestions(previousEntry.suggestions);
+      setSuggestionMetadata(previousEntry.metadata);
+      setCurrentHistoryIndex(newIndex);
+      setAnimateCard(false);
+      setTimeout(() => setAnimateCard(true), 100);
+    }
+  };
+
+  // Function to check if we can go back
+  const canGoBack = () => {
+    return currentHistoryIndex > 0;
+  };
 
   const generateSuggestions = useCallback(async (mealType, dietaryPreference, cuisine, ingredients, suggestionCount) => {
     console.log('🔄 generateSuggestions called with:', { mealType, dietaryPreference, cuisine, ingredients, suggestionCount });
@@ -399,13 +445,17 @@ export default function Suggestions() {
       setLoadingProgress(0.75); // Stage 3: Analyzing All Preferences
       setSuggestions(result.suggestions);
       setHasMoreSuggestions(result.hasMore);
-      setSuggestionMetadata({
+      const metadata = {
         totalAvailable: result.totalAvailable,
         requested: result.requested,
         actual: result.actual,
         remaining: result.remaining,
         totalShown: result.totalShown
-      });
+      };
+      setSuggestionMetadata(metadata);
+      
+      // Add to history
+      addToHistory(result.suggestions, metadata);
       
       setLoadingProgress(1.0); // Stage 4: Ready to Show Suggestions
       setSuggestionsReady(true);
@@ -533,13 +583,17 @@ export default function Suggestions() {
           console.log('📊 Progress state after 0.75:', loadingProgress);
           setSuggestions(result.suggestions);
           setHasMoreSuggestions(result.hasMore);
-          setSuggestionMetadata({
+          const metadata = {
             totalAvailable: result.totalAvailable,
             requested: result.requested,
             actual: result.actual,
             remaining: result.remaining,
             totalShown: result.totalShown
-          });
+          };
+          setSuggestionMetadata(metadata);
+          
+          // Add to history
+          addToHistory(result.suggestions, metadata);
           
           // Add a small delay before final stage
           setTimeout(() => {
@@ -630,13 +684,17 @@ export default function Suggestions() {
         // Replace current suggestions with new ones
         setSuggestions(result.suggestions);
         setHasMoreSuggestions(result.hasMore);
-        setSuggestionMetadata({
+        const metadata = {
           totalAvailable: result.totalAvailable,
           requested: result.requested,
           actual: result.actual,
           remaining: result.remaining,
           totalShown: result.totalShown
-        });
+        };
+        setSuggestionMetadata(metadata);
+        
+        // Add to history
+        addToHistory(result.suggestions, metadata);
         
         // Reset animation for new suggestions
         setAnimateCard(false);
@@ -695,6 +753,23 @@ export default function Suggestions() {
           >
             <ArrowLeft className="w-5 h-5 sm:w-6 sm:h-6 text-gray-700" />
           </button>
+          
+          {/* Go Back to Previous Suggestions Button */}
+          {canGoBack() && (
+            <button
+              onClick={handleGoBack}
+              className="p-2.5 sm:p-3 bg-orange-50 border border-orange-200 rounded-xl shadow-lg transform hover:scale-105 active:scale-95 transition-all duration-200 hover:bg-orange-100"
+              title="Go back to previous suggestions"
+            >
+              <div className="flex items-center gap-1.5">
+                <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 text-orange-600" />
+                <span className="text-xs sm:text-sm font-medium text-orange-700 hidden sm:inline">
+                  Previous
+                </span>
+              </div>
+            </button>
+          )}
+          
           <div className="flex-1 min-w-0">
             <h1 className="text-xl sm:text-2xl font-bold text-gray-900 truncate">
               {getMealTypeIcon(router.query.mealType)} {getMealTypeLabel(router.query.mealType)} Suggestions
@@ -712,6 +787,16 @@ export default function Suggestions() {
               )}
             </p>
           </div>
+          
+          {/* History Indicator */}
+          {suggestionHistory.length > 1 && (
+            <div className="flex items-center gap-1 text-xs text-gray-500 bg-gray-50 px-2 py-1 rounded-full">
+              <span className="hidden sm:inline">History:</span>
+              <span className="font-medium">{currentHistoryIndex + 1}</span>
+              <span>/</span>
+              <span>{suggestionHistory.length}</span>
+            </div>
+          )}
         </div>
 
         {/* Loading State */}
