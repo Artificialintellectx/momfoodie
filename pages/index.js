@@ -407,14 +407,14 @@ export default function Home() {
             </div>
 
             {/* Dietary Preference */}
-            <div className="relative z-0">
+            <div className="relative z-10">
               <CustomDropdown
                 label="Dietary Preference"
                 options={dietaryOptions}
                 value={dietaryPreference}
                 onChange={handleDietaryPreferenceChange}
                 placeholder="Select preference"
-                zIndex={10}
+                zIndex={15}
               />
         </div>
 

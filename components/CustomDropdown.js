@@ -132,7 +132,7 @@ export default function CustomDropdown({ options, value, onChange, placeholder =
       
       {/* Desktop Dropdown - Relative positioning */}
       {open && !disabled && (
-        <div className={`hidden md:block absolute left-0 right-0 mt-2 z-[${zIndex + 1000}] isolate`}>
+        <div className="hidden md:block absolute left-0 right-0 mt-2 z-[9999] isolate">
           <div className="bg-white border-2 border-gray-200 rounded-2xl shadow-2xl py-2 max-h-64 overflow-y-auto relative dropdown-options">
             {options.map((option) => (
               <button
