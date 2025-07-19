@@ -370,13 +370,15 @@ export default function Home() {
               </div>
 
               {/* Full Cuisine Dropdown */}
-              <CustomDropdown
-                label=""
-                options={cuisineOptions}
-                value={cuisine}
-                onChange={setCuisine}
-                placeholder="Or select any Nigerian cuisine..."
-              />
+              <div className="relative">
+                <CustomDropdown
+                  label=""
+                  options={cuisineOptions}
+                  value={cuisine}
+                  onChange={setCuisine}
+                  placeholder="Or select any Nigerian cuisine..."
+                />
+              </div>
               
               {/* Success Indicator */}
               {cuisine && (
@@ -404,7 +406,7 @@ export default function Home() {
             </div>
 
             {/* Dietary Preference */}
-            <div>
+            <div className="relative z-0">
               <CustomDropdown
                 label="Dietary Preference"
                 options={dietaryOptions}
@@ -415,7 +417,7 @@ export default function Home() {
         </div>
 
             {/* Ingredients */}
-            <div>
+            <div className="relative z-0">
               <label className="block text-sm font-semibold text-gray-700 mb-3">
                 Available Ingredients (optional)
               </label>
@@ -478,7 +480,7 @@ export default function Home() {
 
       {/* Feedback Modal */}
       {showFeedback && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-3 sm:p-4 z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-3 sm:p-4 z-[9997]">
           <div className="bg-white rounded-2xl p-4 sm:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4 sm:mb-6">
               <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Share Feedback</h2>
