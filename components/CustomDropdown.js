@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 
-export default function CustomDropdown({ options, value, onChange, placeholder = 'Select...', label, disabled = false }) {
+export default function CustomDropdown({ options, value, onChange, placeholder = 'Select...', label, disabled = false, zIndex = 10 }) {
   const [open, setOpen] = useState(false);
   const containerRef = useRef(null);
   const buttonRef = useRef(null);
@@ -40,7 +40,7 @@ export default function CustomDropdown({ options, value, onChange, placeholder =
   }, [selected, open]);
 
   return (
-    <div className="w-full relative z-10" ref={containerRef}>
+    <div className={`w-full relative z-[${zIndex}]`} ref={containerRef}>
       {label && (
         <label className="block text-sm font-semibold text-gray-700 mb-3">{label}</label>
       )}
@@ -132,7 +132,7 @@ export default function CustomDropdown({ options, value, onChange, placeholder =
       
       {/* Desktop Dropdown - Relative positioning */}
       {open && !disabled && (
-        <div className="hidden md:block absolute left-0 right-0 mt-2 z-[9999] isolate">
+        <div className={`hidden md:block absolute left-0 right-0 mt-2 z-[${zIndex + 1000}] isolate`}>
           <div className="bg-white border-2 border-gray-200 rounded-2xl shadow-2xl py-2 max-h-64 overflow-y-auto relative dropdown-options">
             {options.map((option) => (
               <button

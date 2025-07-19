@@ -377,6 +377,7 @@ export default function Home() {
                   value={cuisine}
                   onChange={setCuisine}
                   placeholder="Or select any Nigerian cuisine..."
+                  zIndex={30}
                 />
               </div>
               
@@ -413,6 +414,7 @@ export default function Home() {
                 value={dietaryPreference}
                 onChange={handleDietaryPreferenceChange}
                 placeholder="Select preference"
+                zIndex={10}
               />
         </div>
 
