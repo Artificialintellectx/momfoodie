@@ -333,7 +333,7 @@ export default function Home() {
           </div>
 
             {/* Enhanced Cuisine Selection */}
-            <div className={`relative ${!cuisine ? 'animate-pulse' : ''} ${mealType && !cuisine ? 'ring-2 ring-orange-200 ring-opacity-50 rounded-xl p-2 -m-2' : ''}`}>
+            <div className={`relative ${mealType && !cuisine ? 'ring-2 ring-orange-200 ring-opacity-50 rounded-xl p-2 -m-2' : ''}`}>
               <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-3">
                 <label className="block text-sm font-semibold text-gray-700">
                   Choose Your Cuisine
